@@ -23,11 +23,12 @@ async def change_status():
 
     while not client.is_closed():
         await client.change_presence(activity=diskord.Game(name=next(statuses)))
-        await sleep(10)
+        await sleep(5)
 
 @client.event
 async def on_ready():
     print(f"{client.user} is online | {len(client.guilds)} servers")
+    client.loop.create_task(change_status())
 
 for file in os.listdir("./cogs"):
     if file.endswith(".py"):
