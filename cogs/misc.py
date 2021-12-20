@@ -172,6 +172,24 @@ https://discord.gg/tTTuNRwRYJ
 
         await ctx.send(embed=embed)
 
+    @commands.command(help="Submit a suggestion")
+    async def suggest(self, ctx, *, suggestion: str):
+        if len(suggestion) < 10:
+            await ctx.send("Your suggestion is too short. It must be at least 10 characters long.")
+            return
+        else:
+            channel = await self.client.fetch_channel(869313090720772127)
+
+            embed = diskord.Embed(
+                title="Suggestion",
+                description=f"{suggestion}",
+                color=embed_color
+            )
+            embed.set_author(name=f"{ctx.author}", icon_url=f"{ctx.author.avatar}")
+            embed.set_footer(text=f"User ID: {ctx.author.id}")
+
+            await ctx.send("Suggestion successfully submitted!")
+            await channel.send(embed=embed)
 
 def setup(client):
     client.add_cog(Miscellaneous(client))

@@ -17,6 +17,7 @@ async def change_status():
     statuses = cycle(
         [
             "re!help",
+            "re!invite",
             "re!vote"
         ]
     )
