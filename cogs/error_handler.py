@@ -62,7 +62,7 @@ class Errors(commands.Cog):
             )
         elif isinstance(error, commands.CommandOnCooldown):
             await ctx.send(
-                f"{fail} Whoa, slow down. This command is on cooldown, try again in {round(error.retry_after, 2)} seconds."
+                f"{fail} This command is on cooldown, try again in {round(error.retry_after, 2)} seconds."
             )
         elif isinstance(error, commands.BadArgument):
             await ctx.send(
@@ -105,7 +105,7 @@ class Errors(commands.Cog):
             ).add_field(name="Error:", value=error)
             embed.set_footer(text=f"User ID: {ctx.author.id}")
 
-            error_channel = self.client.get_channel(919158043776782367)
+            error_channel = await self.client.fetch_channel(919158043776782367)
 
             await error_channel.send("<@&906675040005812255>", embed=embed)
             await ctx.send(embed=error_embed)

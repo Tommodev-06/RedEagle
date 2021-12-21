@@ -15,8 +15,22 @@ class Owner(commands.Cog):
             title="Owner-only commands",
             color=0xF00C0C
         )
+        embed.add_field(name="Send a embed", value="`re!embed <title> // <description>`", inline=False)
         embed.add_field(name="Reload cogs", value="`re![reload|refresh]`", inline=False)
         embed.add_field(name="Check the perms for the Muted role", value="`re!mutecheck`", inline=False)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.is_owner()
+    async def embed(self, ctx, *, args):
+        title, desription = args.split("//")
+
+        embed = diskord.Embed(
+            title=f"{title}",
+            description=f"{desription}",
+            color=0xF00C0C
+        )
 
         await ctx.send(embed=embed)
 

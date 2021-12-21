@@ -135,31 +135,27 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
         embed = diskord.Embed(
             title=f"What's new in the {botversion} version?",
             description=f"""
-
-➜ New help command and implemented buttons.
-
-    """, color=embed_color)
+            ➜ New help command.
+            """,
+            color=embed_color
+        )
 
         await ctx.send(embed=embed)
 
     @commands.command(help="Get the invite link of RedEagle")
     async def invite(self, ctx):
-        await ctx.send("""
+        await ctx.send("""        
+        Thanks for your interest in the bot! Invite it with the link below!
         
-Thanks for your interest in the bot! Invite it with the link below!
-
-https://dsc.gg/redeagle        
-        
+        https://dsc.gg/redeagle   
         """)
 
     @commands.command(help="Get the support server's link")
     async def support(self, ctx):
         await ctx.send("""
-
-Join the support server with the link below!
-        
-https://discord.gg/tTTuNRwRYJ        
-        
+        Join the support server with the link below!
+            
+        https://discord.gg/tTTuNRwRYJ        
         """)
 
     @commands.command(help="Upvote RedEagle on Top.gg")
@@ -173,6 +169,7 @@ https://discord.gg/tTTuNRwRYJ
         await ctx.send(embed=embed)
 
     @commands.command(help="Submit a suggestion")
+    @commands.cooldown(1, 300, commands.BucketType.user)
     async def suggest(self, ctx, *, suggestion: str):
         if len(suggestion) < 10:
             await ctx.send("Your suggestion is too short. It must be at least 10 characters long.")

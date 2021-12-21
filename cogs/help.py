@@ -28,9 +28,8 @@ class HelpDropdown(diskord.ui.Select):
 `{prefix}raw [message_id]` ➜ get raw text of a message (you can reply to a message).
 `{prefix}poll <question> <options>` ➜ create a poll with a maximum of 10 options.
 Example: `{prefix}poll "Do you like the bot?" Yes, a lot! // Yeah // No`
-
-`{prefix}addrole <user> <role>` ➜ add a role to a user. (Aliases: ["`ar`"])
-`{prefix}removerole <user> <role>` ➜ remove a role from a user. (Aliases: ["`rr`"])
+`{prefix}addrole <user> <role>` ➜ add a role to a user (aliases: `ar`).
+`{prefix}removerole <user> <role>` ➜ remove a role from a user (aliases: `rr`).
 
             """, color=embed_color)
 
@@ -43,7 +42,7 @@ Example: `{prefix}poll "Do you like the bot?" Yes, a lot! // Yeah // No`
 `{prefix}kick <user> [reason]` ➜ kick a user.
 `{prefix}ban <user> [reason]` ➜ ban a user.
 `{prefix}mute <user> [reason]` ➜ mute a user.
-`{prefix}tempmute <user> <duration> [reason]` ➜ tempmute a user. (Aliases: ["`tmute`"])
+`{prefix}tempmute <user> <duration> [reason]` ➜ tempmute a user (aliases: `tmute`).
 `{prefix}unmute <user>` ➜ unmute a user.
 `{prefix}clear <amount>` ➜ clear the specofied amount of messages.
 `{prefix}slowmode <seconds>` ➜ set the slowmode to the specified seconds.
@@ -55,13 +54,13 @@ Example: `{prefix}poll "Do you like the bot?" Yes, a lot! // Yeah // No`
             embed = diskord.Embed(description=f"""
 
 `{prefix}ping` ➜ get the bot's latency.
-`{prefix}userinfo [user]` ➜ get information about a user. (Aliases: ["`ui`"])
-`{prefix}serverinfo` ➜ get information about this server. (Aliases: ["`si`"])
-`{prefix}avatar [user]` ➜ get the profile picture of a user. (Aliases: ["`av`", "`pfp`"])
+`{prefix}userinfo [user]` ➜ get information about a user (aliases: `ui`).
+`{prefix}serverinfo` ➜ get information about this server (aliases: `si`).
+`{prefix}avatar [user]` ➜ get the profile picture of a user (aliases: `av`, `pfp`).
 `{prefix}say <text>` ➜ make the bot say something.
 `{prefix}embedsay <title> // <description>` ➜ create an embed with your text.
 `{prefix}sponsor` ➜ see our partnership with GalaxyNodes.
-`{prefix}stats` ➜ get information about RedEagle. (Aliases: ["`info`"])
+`{prefix}stats` ➜ get information about RedEagle (aliases: `info`).
 `{prefix}changelog` ➜ see what's new in the latest version of RedEagle. 
 `{prefix}invite` ➜ get the invite link of RedEagle.
 `{prefix}support` ➜ get the support server's link.
@@ -82,7 +81,7 @@ class Help(commands.Cog):
         self.client = client
 
     @commands.command()
-    async def help(self, ctx):
+    async def helptest(self, ctx):
         await ctx.send("Select the category to show commands for.\nIf an argument is in <angle brackets>, "
                        "it's required. If it is in [squared brackets], it's optional.", view=HelpDropdownView())
 
