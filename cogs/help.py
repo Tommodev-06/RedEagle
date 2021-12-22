@@ -8,12 +8,12 @@ class HelpDropdown(diskord.ui.Select):
     def __init__(self):
 
         options = [
-            diskord.SelectOption(label="Utilities", description="See all the utilities commands.",
-                                 emoji="<:utilities:918837614092636181>"),
-            diskord.SelectOption(label="Moderation", description="See al the moderation commands.",
-                                 emoji="<:moderation:918837967957663765>"),
             diskord.SelectOption(label="Miscellaneous", description="See all the miscellaneous commands.",
                                  emoji="<:miscellaneous:918838334292389908>"),
+            diskord.SelectOption(label="Moderation", description="See al the moderation commands.",
+                                 emoji="<:moderation:918837967957663765>"),
+            diskord.SelectOption(label="Utilities", description="See all the utilities commands.",
+                                 emoji="<:utilities:918837614092636181>")
         ]
 
         super().__init__(placeholder="Select a category...", min_values=1, max_values=1, options=options)
@@ -81,7 +81,7 @@ class Help(commands.Cog):
         self.client = client
 
     @commands.command()
-    async def helptest(self, ctx):
+    async def help(self, ctx):
         await ctx.send("Select the category to show commands for.\nIf an argument is in <angle brackets>, "
                        "it's required. If it is in [squared brackets], it's optional.", view=HelpDropdownView())
 

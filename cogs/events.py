@@ -18,8 +18,6 @@ class Events(commands.Cog):
             await message.channel.send(
                 "My prefix is `re!`. Type `re!help` to see the available commands."
             )
-        else:
-            await self.client.process_commands(message)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
