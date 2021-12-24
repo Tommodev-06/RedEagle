@@ -1,15 +1,13 @@
 import diskord
 from diskord.ext import commands
 import datetime
-import asyncio
+import humanfriendly
 
 embed_color = 0xF00C0C
 prefix = "re!"
 success = "<a:success:865522277729566741>"
 fail = "<a:fail:866017479696318534>"
 
-
-# noinspection PyTypeChecker
 class Moderation(commands.Cog, description="Moderation commands"):
     def __init__(self, client):
         self.client = client
@@ -25,7 +23,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
         embed = diskord.Embed(
             title="Channel locked",
             description=f"This channel was locked by {ctx.author.mention} 🔒",
-            color=0x538AEE
+            color=embed_color
         )
         embed.timestamp = datetime.datetime.utcnow()
 
@@ -42,7 +40,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
         embed = diskord.Embed(
             title="Channel unlocked",
             description=f"This channel was unlocked by {ctx.author.mention} 🔓",
-            color=0x538AEE
+            color=embed_color
         )
         embed.timestamp = datetime.datetime.utcnow()
 
@@ -83,7 +81,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
         embed = diskord.Embed(
             title="User kicked",
             description=f"{member.mention} was kicked by {ctx.author.mention}.",
-            color=0x538AEE
+            color=embed_color
         )
         embed.add_field(name="Reason", value=reason)
         embed.timestamp = datetime.datetime.utcnow()
@@ -125,7 +123,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
         embed = diskord.Embed(
             title="User banned",
             description=f"{member.mention} was banned by {ctx.author.mention}.",
-            color=0x538AEE
+            color=embed_color
         )
         embed.add_field(name="Reason", value=reason)
         embed.timestamp = datetime.datetime.utcnow()
@@ -134,6 +132,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
 
     async def mute_checker(self, ctx, bot_role, member, muted_role):
         bot_role = ctx.guild.me.top_role
+        muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
 
         if member == ctx.author:
             await ctx.message.delete()
@@ -177,7 +176,6 @@ class Moderation(commands.Cog, description="Moderation commands"):
     async def mute(self, ctx, member: commands.MemberConverter, *, reason: str = None):
         muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
 
-        # noinspection PyTypeChecker
         if (
                 await self.mute_checker(ctx, ctx.guild.me.top_role, member, muted_role)
                 == False
@@ -189,7 +187,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
             embed = diskord.Embed(
                 title="User muted",
                 description=f"{member.mention} was muted by {ctx.author.mention}.",
-                color=0x538AEE
+                color=embed_color
             )
             embed.add_field(name="Reason", value=reason)
 
@@ -204,43 +202,10 @@ class Moderation(commands.Cog, description="Moderation commands"):
 
             await member.send(embed=embeddm)
 
-    time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
-
-    invalid_duration_msg = (
-            "<a:fail:866017479696318534> **Invalid duration**! Here are some examples:\n\n"
-            + f'`{prefix}tempmute @Brosky 2d Spam`- 2 days, with reason "Spam"\n'
-            + f"`{prefix}tmute @Brosky 1h`- 1 hour without any reason\n"
-            + f"`{prefix}tempmute @Brosky 20m`- 20 minutes without any reason\n"
-            + "\nYou can also use `s` for seconds."
-    )
-
-    async def time2seconds(self, send, time):
-        try:
-            return int(time[:-1]) * self.time_convert[time[-1]]
-        except:
-            try:
-                return int(time)
-            except:
-                await send(self.invalid_duration_msg)
-                return False
-
     @commands.command(help="Tempmute a user", aliases=["tmute"])
     @commands.has_permissions(manage_roles=True)
-    async def tempmute(self, ctx, member: commands.MemberConverter, duration: str, *, reason: str = None):
+    async def tempmute(self, ctx, member: commands.MemberConverter, time: str, *, reason: str = None):
         muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
-        unit_tuple = tuple([unit for unit in self.time_convert.keys()])
-        sleep_duration = await self.time2seconds(ctx.send, duration.lower())
-
-        if sleep_duration is False:
-            return
-
-        if not duration.lower().endswith(unit_tuple) or not duration[0].isdigit():
-            await ctx.send(self.invalid_duration_msg)
-            return
-
-        if muted_role in member.roles:
-            await ctx.send("<a:fail:866017479696318534> | This user is muted yet!")
-            return
 
         if (
                 await self.mute_checker(ctx, ctx.guild.me.top_role, member, muted_role)
@@ -248,69 +213,45 @@ class Moderation(commands.Cog, description="Moderation commands"):
         ):
             return
 
-        await member.add_roles(muted_role, reason=reason)
+        if "s" or "m" or "d" or "w" in str(time):
+            time = humanfriendly.parse_timespan(time)
+            if time > 604800:
+                await ctx.send("The max value is one week.")
+                return
+            else:
+                now = datetime.datetime.utcnow()
+                until = now + datetime.timedelta(seconds=time)
 
-        embed = diskord.Embed(
-            title="User muted",
-            description=f"{member.mention} was temporarily muted by {ctx.author.mention}.",
-            color=embed_color
-        )
-        embed.add_field(name="Reason", value=reason)
+                await member.edit(communication_disabled_until=until, reason=f"Muted by {ctx.author}. Reason: {reason}")
 
-        embdm = diskord.Embed(
-            title="You were muted",
-            description=f"You were temporarily muted in **{ctx.guild.name}** by **{ctx.author}**.",
-            color=embed_color
-        )
-        embdm.add_field(name="Reason", value=reason)
+                embed = diskord.Embed(
+                    title="Member muted",
+                    description=f"{member.mention} was muted by {ctx.author.mention}.",
+                    color=embed_color
+                )
+                embed.add_field(name="Reason", value=reason)
 
-        if not duration[-1].isalpha():
-            embed.add_field(name="Auto-unmute after", value=str(duration) + " seconds")
-            embdm.add_field(name="Auto-unmute after", value=str(duration) + " seconds")
-        else:
-            embed.add_field(name="Auto-unmute after", value=duration)
-            embdm.add_field(name="Auto-unmute after", value=duration)
+                await ctx.send(embed=embed)
 
-            await ctx.send(embed=embed)
-            await member.send(embed=embdm)
-
-            await asyncio.sleep(sleep_duration)
-            await member.remove_roles(muted_role, reason="Tempmute finished")
-
-            embch = diskord.Embed(
-                title="User unmuted",
-                description=f"{member.mention} was unmuted",
-                color=embed_color
+    @tempmute.error
+    async def tempmute_error(self, ctx, time):
+        if "s" or "m" or "d" or "y" not in str(time):
+            await ctx.send(
+                "Invalid durantion. You can use `s` for seconds, `m` for minutes, `d` for days and `w` for weeks."
             )
-            embch.add_field(name="Reason", value="Tempmute finished")
-
-            embend = diskord.Embed(
-                title="You were unmuted",
-                description=f"You were unmuted in **{ctx.guild.name}**.",
-                color=embed_color
-            )
-            embend.add_field(name="Reason", value="Tempmute finished")
-
-            await member.send(embed=embend)
-            await ctx.channel.send(embed=embch)
+            return
 
     @commands.command(help="Unmute a user")
     async def unmute(self, ctx, member: commands.MemberConverter):
         muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
 
-        if not muted_role in member.roles:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} This user isn't muted!")
-            return
-
-        elif ctx.guild.me.top_role <= muted_role:
+        if ctx.guild.me.top_role <= muted_role:
             await ctx.message.delete()
             await ctx.send(
                 f"{fail} My role is too low. I can only unmute users if my role is higher than "
                 "the Muted role!", delete_after=3
             )
             return
-
         elif ctx.guild.me.top_role <= member.top_role:
             await ctx.message.delete()
             await ctx.send(
@@ -319,12 +260,15 @@ class Moderation(commands.Cog, description="Moderation commands"):
             )
             return
 
-        await member.remove_roles(muted_role)
+        if muted_role in member.roles:
+            await member.remove_roles(muted_role)
+        else:
+            await member.edit(communication_disabled_until=None)
 
         embed = diskord.Embed(
             title="User unmuted",
             description=f"{member.mention} was unmuted by {ctx.author.mention}.",
-            color=0x538AEE
+            color=embed_color
         )
 
         await ctx.send(embed=embed)
@@ -332,7 +276,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
         embeddm = diskord.Embed(
             title="You were unmuted",
             description=f"You were unmuted in **{ctx.guild.name}** by **{ctx.author}**.",
-            color=0x538AEE
+            color=embed_color
         )
         await member.send(embed=embeddm)
 
