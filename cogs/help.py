@@ -94,7 +94,8 @@ class Help(commands.Cog):
     @commands.command()
     async def help(self, ctx):
         await ctx.send("Select the category to show commands for.\nIf an argument is in <angle brackets>, "
-                       "it's required. If it is in [squared brackets], it's optional.", view=HelpDropdownView())
+                       "it's required. If it is in [squared brackets], it's optional.", view=HelpDropdownView()
+                       )
 
 def setup(client):
     client.add_cog(Help(client))

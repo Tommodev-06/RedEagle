@@ -296,7 +296,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
                     f"{fail} Due to Discord's ToS, you can't delete messages that are more than 14 days old.", delete_after=4
                 )
 
-    @commands.command(help="Set the slowmode to the specified seconds")
+    @commands.command(help="Set the slowmode to the specified seconds", aliases=["sm"])
     @commands.has_permissions(manage_messages=True)
     async def slowmode(self, ctx, seconds: int):
         if seconds > 21600:

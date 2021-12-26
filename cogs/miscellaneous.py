@@ -12,7 +12,7 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
     async def ping(self, ctx):
         await ctx.send(content=f":ping_pong: The bot latency is **{round(self.client.latency * 1000, 1)}ms**.")
 
-    @commands.command(help="Get information about a user")
+    @commands.command(help="Get information about a user", aliases=["ui"])
     async def userinfo(self, ctx, user: commands.MemberConverter = None):
         user = user or ctx.author
 
@@ -31,7 +31,7 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
 
         await ctx.send(embed=embed)
 
-    @commands.command(help="Get information about this server")
+    @commands.command(help="Get information about this server", aliases=["si"])
     async def serverinfo(self, ctx):
         humans = [member for member in ctx.guild.members if not member.bot]
         bots = [member for member in ctx.guild.members if member.bot]
@@ -54,6 +54,7 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
         embed.add_field(name="Owner", value=ctx.guild.owner.mention)
         embed.add_field(name="Created", value=f"<t:{round(ctx.guild.created_at.timestamp())}:R>")
         embed.add_field(name="Emojis", value=f"{len(ctx.guild.emojis)} emojis")
+        embed.add_field(name="Verification level", value=f"{str(ctx.guild.verification_level).capitalize()}")
         embed.set_thumbnail(url=ctx.guild.icon)
 
         await ctx.send(embed=embed)
@@ -135,7 +136,9 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
         embed = diskord.Embed(
             title=f"What's new in the {botversion} version?",
             description=f"""
-            ➜ New help command.
+            
+➜ New help command.
+            
             """,
             color=embed_color
         )
@@ -144,18 +147,22 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
 
     @commands.command(help="Get the invite link of RedEagle")
     async def invite(self, ctx):
-        await ctx.send("""        
-        Thanks for your interest in the bot! Invite it with the link below!
+        await ctx.send(""" 
+               
+Thanks for your interest in the bot! Invite it with the link below!
+
+https://dsc.gg/redeagle   
         
-        https://dsc.gg/redeagle   
         """)
 
     @commands.command(help="Get the support server's link")
     async def support(self, ctx):
         await ctx.send("""
-        Join the support server with the link below!
-            
-        https://discord.gg/tTTuNRwRYJ        
+        
+Join the support server with the link below!
+    
+https://discord.gg/tTTuNRwRYJ        
+        
         """)
 
     @commands.command(help="Upvote RedEagle on Top.gg")
