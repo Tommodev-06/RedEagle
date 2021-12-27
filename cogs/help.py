@@ -5,7 +5,7 @@ prefix = "re!"
 embed_color = 0xF00C0C
 
 class HelpDropdown(diskord.ui.Select):
-    def __init__(self):
+    def __init__(self, ctx):
 
         options = [
             diskord.SelectOption(label="Miscellaneous", description="See all the miscellaneous commands.",
@@ -17,9 +17,15 @@ class HelpDropdown(diskord.ui.Select):
         ]
 
         super().__init__(placeholder="Select a category...", min_values=1, max_values=1, options=options)
+        self.ctx = ctx
 
     async def callback(self, interaction: diskord.Interaction):
         msg = interaction.message
+
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_message("This is not your help command. Get your with `re!help`.",
+                                                    ephemeral=True)
+            return
 
         if self.values[0] == "Miscellaneous":
             embed = diskord.Embed(
@@ -82,10 +88,11 @@ Example: `{prefix}poll "Do you like the bot?" Yes, a lot! // Yeah // No`
             await msg.edit(content="<:utilities:924694038177792010> **Utilities commands**", embed=embed)
 
 class HelpDropdownView(diskord.ui.View):
-    def __init__(self):
+    def __init__(self, ctx):
         super().__init__()
+        self.ctx = ctx
 
-        self.add_item(HelpDropdown())
+        self.add_item(HelpDropdown(ctx))
 
 class Help(commands.Cog):
     def __init__(self, client):
@@ -94,7 +101,7 @@ class Help(commands.Cog):
     @commands.command()
     async def help(self, ctx):
         await ctx.send("Select the category to show commands for.\nIf an argument is in <angle brackets>, "
-                       "it's required. If it is in [squared brackets], it's optional.", view=HelpDropdownView()
+                       "it's required. If it is in [squared brackets], it's optional.", view=HelpDropdownView(ctx)
                        )
 
 def setup(client):
