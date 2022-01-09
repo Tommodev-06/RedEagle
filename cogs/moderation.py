@@ -15,10 +15,16 @@ class Moderation(commands.Cog, description="Moderation commands"):
     @commands.command(help="Lock a text channel")
     @commands.has_permissions(manage_channels=True)
     async def lock(self, ctx, channel: diskord.TextChannel = None):
-        channel = ctx.channel or channel
+        channel = channel or ctx.channel
+        role = ctx.guild.default_role
+        perms = channel.permissions_for(role)
 
-        await channel.set_permissions(ctx.guild.default_role, send_messages=False)
         await ctx.send(f"{success} Successfully locked {channel.mention}", delete_after=2)
+
+        if not perms.view_channel:
+            await channel.set_permissions(role, view_channel=False, send_messages=False)
+        else:
+            await channel.set_permissions(role, send_messages=False)
 
         embed = diskord.Embed(
             title="Channel locked",
@@ -32,10 +38,16 @@ class Moderation(commands.Cog, description="Moderation commands"):
     @commands.command(help="Unlock a text channel")
     @commands.has_permissions(manage_channels=True)
     async def unlock(self, ctx, channel: diskord.TextChannel = None):
-        channel = ctx.channel or channel
+        channel = channel or ctx.channel
+        role = ctx.guild.default_role
+        perms = channel.permissions_for(role)
 
-        await channel.set_permissions(ctx.guild.default_role, send_messages=True)
         await ctx.send(f"{success} Successfully unlocked {channel.mention}", delete_after=2)
+
+        if not perms.view_channel:
+            await channel.set_permissions(role, view_channel=False, send_messages=True)
+        else:
+            await channel.set_permissions(role, send_messages=False)
 
         embed = diskord.Embed(
             title="Channel unlocked",
@@ -283,17 +295,26 @@ class Moderation(commands.Cog, description="Moderation commands"):
     @commands.command(help="Clear the specified amount of messages")
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int):
+        messages = []
+        async for message in ctx.channel.history(limit=amount + 1):
+            messages.append(message)
+
         if amount > 100:
             await ctx.message.delete()
-            await ctx.send(f"{fail} You can delete up to 100 messages!", delete_after=3)
+            await ctx.send(f"{fail} You can delete up to 100 messages!", delete_after=2)
+            return
+        elif amount <= 0:
+            await ctx.message.delete()
+            await ctx.send(f"{fail} The amount must be a number greater than 0!", delete_after=2)
+            return
         else:
             try:
-                await ctx.channel.purge(limit=amount)
-                await ctx.send(f"{success} {amount} messages have been deleted by {ctx.author}.", delete_after=3)
+                await ctx.channel.delete_messages(messages)
+                await ctx.send(f"{len(messages) - 1} messages have been deleted by {ctx.author}.", delete_after=3)
             except diskord.Forbidden:
-                pass
                 await ctx.send(
-                    f"{fail} Due to Discord's ToS, you can't delete messages that are more than 14 days old.", delete_after=4
+                    f"{fail} Due to Discord's ToS, you can't delete messages that are more than 14 days old.",
+                    delete_after=3
                 )
 
     @commands.command(help="Set the slowmode to the specified seconds", aliases=["sm"])
