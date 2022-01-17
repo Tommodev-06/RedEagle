@@ -12,6 +12,8 @@ class HelpDropdown(diskord.ui.Select):
                                  emoji="<:miscellaneous:918838334292389908>"),
             diskord.SelectOption(label="Moderation", description="See al the moderation commands.",
                                  emoji="<:moderation:918837967957663765>"),
+            diskord.SelectOption(label="Suggestions", description="See all the suggestion commands.",
+                                 emoji="<:suggestion:930119666045706260>"),
             diskord.SelectOption(label="Utilities", description="See all the utilities commands.",
                                  emoji="<:utilities:924694038177792010>")
         ]
@@ -23,7 +25,7 @@ class HelpDropdown(diskord.ui.Select):
         msg = interaction.message
 
         if interaction.user != self.ctx.author:
-            await interaction.response.send_message("This is not your help command. Get your with `re!help`.",
+            await interaction.response.send_message("This is not your help command.",
                                                     ephemeral=True)
             return
 
@@ -39,6 +41,7 @@ class HelpDropdown(diskord.ui.Select):
 `{prefix}embedsay <title> // <description>` ➜ create an embed with your text.
 `{prefix}sponsor` ➜ see our partnership with GalaxyNodes.
 `{prefix}stats` ➜ get information about RedEagle (aliases: `info`).
+`{prefix}submit <suggestion>` ➜ submit a suggestion for the bot.
 `{prefix}changelog` ➜ see what's new in the latest version of RedEagle. 
 `{prefix}invite` ➜ get the invite link of RedEagle.
 `{prefix}support` ➜ get the support server's link.
@@ -61,7 +64,7 @@ class HelpDropdown(diskord.ui.Select):
 `{prefix}mute <user> [reason]` ➜ mute a user.
 `{prefix}tempmute <user> <duration> [reason]` ➜ tempmute a user (aliases: `tmute`).
 `{prefix}unmute <user>` ➜ unmute a user.
-`{prefix}clear <amount>` ➜ clear the specofied amount of messages.
+`{prefix}clear <amount>` ➜ clear the specified amount of messages.
 `{prefix}slowmode <seconds>` ➜ set the slowmode to the specified seconds.
 
             """,
@@ -69,6 +72,20 @@ class HelpDropdown(diskord.ui.Select):
             )
 
             await msg.edit(content="<:moderation:918837967957663765> **Moderation commands**", embed=embed)
+
+        elif self.values[0] == "Suggestions":
+            embed = diskord.Embed(
+                description=f"""
+
+`{prefix}suggest help ➜ see the available suggest commands.
+`{prefix}suggest channel <#channel> ➜ set the channel for suggestions.
+`{prefix}suggest send <suggestion> ➜ submit a suggestion for the server.
+
+                """,
+                color=embed_color
+            )
+
+            await msg.edit(content="<:suggestion:930119666045706260> **Suggestion commands**", embed=embed)
 
         elif self.values[0] == "Utilities":
             embed = diskord.Embed(

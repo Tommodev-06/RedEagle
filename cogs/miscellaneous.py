@@ -113,17 +113,17 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
         embed = diskord.Embed(
             title=f"Info and Stats about RedEagle",
             description=f"""
-            **Bot Info**
-            <:developer:918867639886049301> Tommodev#9134
-            <:python:918867852176551966> Developed in Python
-            <:terminal:918868581150756894> Prefixes: `re!` | `Re!` | `@mention `
-            <:file_upload:918872362336804895> Version: `{botversion}`
-            
-            **Bot Stats**
-            <:time:918871014182625281> Latency: `{round(self.client.latency * 1000, 1)}ms`
-            <:server:918872745033490482> Servers: `{len(self.client.guilds)} servers`
-            <:users:918873187670970389> Users: `{sum([len(guild.members) for guild in self.client.guilds])} users`
-            <:list:918876883599368284> N. of commands: `{len(self.client.commands)} commands`
+**Bot Info**
+<:developer:918867639886049301> Tommodev#9134
+<:python:918867852176551966> Developed in Python
+<:terminal:918868581150756894> Prefixes: `re!` | `Re!` | `@mention `
+<:file_upload:918872362336804895> Version: `{botversion}`
+
+**Bot Stats**
+<:time:918871014182625281> Latency: `{round(self.client.latency * 1000, 1)}ms`
+<:server:918872745033490482> Servers: `{len(self.client.guilds)} servers`
+<:users:918873187670970389> Users: `{sum([len(guild.members) for guild in self.client.guilds])} users`
+<:list:918876883599368284> N. of commands: `{len(self.client.commands)} commands`
             """,
             color=embed_color
         )
@@ -131,53 +131,9 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
 
         await ctx.send(embed=embed)
 
-    @commands.command(help="See what's new in the latest version of RedEagle")
-    async def changelog(self, ctx):
-        embed = diskord.Embed(
-            title=f"What's new in the {botversion} version?",
-            description=f"""
-            
-➜ New help command.
-            
-            """,
-            color=embed_color
-        )
-
-        await ctx.send(embed=embed)
-
-    @commands.command(help="Get the invite link of RedEagle")
-    async def invite(self, ctx):
-        await ctx.send(""" 
-               
-Thanks for your interest in the bot! Invite it with the link below!
-
-https://dsc.gg/redeagle   
-        
-        """)
-
-    @commands.command(help="Get the support server's link")
-    async def support(self, ctx):
-        await ctx.send("""
-        
-Join the support server with the link below!
-    
-https://discord.gg/tTTuNRwRYJ        
-        
-        """)
-
-    @commands.command(help="Upvote RedEagle on Top.gg")
-    async def vote(self, ctx):
-        embed = diskord.Embed(
-            title="Vote RedEagle",
-            description=f"[Click here to vote on Top.gg](https://top.gg/bot/856643485340139580/vote)",
-            color=embed_color
-        )
-
-        await ctx.send(embed=embed)
-
-    @commands.command(help="Submit a suggestion")
+    @commands.command(help="Submit a suggestion for the bot")
     @commands.cooldown(1, 300, commands.BucketType.user)
-    async def suggest(self, ctx, *, suggestion: str):
+    async def submit(self, ctx, *, suggestion: str):
         if len(suggestion) < 10:
             await ctx.send("Your suggestion is too short. It must be at least 10 characters long.")
             return
@@ -194,6 +150,50 @@ https://discord.gg/tTTuNRwRYJ
 
             await ctx.send("Suggestion successfully submitted!")
             await channel.send(embed=embed)
+
+    @commands.command(help="See what's new in the latest version of RedEagle")
+    async def changelog(self, ctx):
+        embed = diskord.Embed(
+            title=f"What's new in the {botversion} version?",
+            description=f"""
+
+➜ New help command.
+
+            """,
+            color=embed_color
+        )
+
+        await ctx.send(embed=embed)
+
+    @commands.command(help="Get the invite link of RedEagle")
+    async def invite(self, ctx):
+        await ctx.send(""" 
+
+Thanks for your interest in the bot! Invite it with the link below!
+
+https://dsc.gg/redeagle   
+
+        """)
+
+    @commands.command(help="Get the support server's link")
+    async def support(self, ctx):
+        await ctx.send("""
+
+Join the support server with the link below!
+
+https://discord.gg/tTTuNRwRYJ        
+
+        """)
+
+    @commands.command(help="Upvote RedEagle on Top.gg")
+    async def vote(self, ctx):
+        embed = diskord.Embed(
+            title="Vote RedEagle",
+            description=f"[Click here to vote on Top.gg](https://top.gg/bot/856643485340139580/vote)",
+            color=embed_color
+        )
+
+        await ctx.send(embed=embed)
 
 def setup(client):
     client.add_cog(Miscellaneous(client))
