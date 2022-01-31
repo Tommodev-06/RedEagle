@@ -1,6 +1,6 @@
 # RedEagle
 
-RedEagle is a bot developed in Python by **Tommodev#9134**.
+RedEagle is a bot developed in Python by **Tommodev#0001**.
 
 - All commands can be used free of charge.
 - Frequent updates.
