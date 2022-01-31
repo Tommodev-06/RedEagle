@@ -32,20 +32,27 @@ class Events(commands.Cog):
 
         await channel.send("Hey <@825292137338765333>, I joined a new server!", embed=embed)
 
-        muted_role = await guild.create_role(name="Muted")
+        muted_role = diskord.utils.get(guild.roles, name="Muted")
 
-        for channel in guild.channels:
-            await channel.set_permissions(
-                muted_role, send_messages=False, speak=False
-            )
+        if muted_role:
+            return
+        else:
+            muted_role = await guild.create_role(name="Muted")
+
+            for channel in guild.text_channels:
+                overwrite = channel.overwrites_for(muted_role)
+                overwrite.send_messages = False
+
+                await channel.set_permissions(muted_role, overwrite=overwrite)
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
-        muted_role = diskord.utils.get(channel.guild.roles[::-1], name="Muted")
+        muted_role = diskord.utils.get(channel.guild.roles, name="Muted")
 
-        await channel.set_permissions(
-            muted_role, send_messages=False, speak=False
-        )
+        overwrite = channel.overwrites_for(muted_role)
+        overwrite.send_messages = False
+
+        await channel.set_permissions(muted_role, overwrite=overwrite)
 
 def setup(client):
     client.add_cog(Events(client))

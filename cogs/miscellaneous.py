@@ -8,7 +8,7 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(help="Get the bot's latency")
+    @commands.command(help="Get the bot's latency", aliases=["latency"])
     async def ping(self, ctx):
         await ctx.send(content=f":ping_pong: The bot latency is **{round(self.client.latency * 1000, 1)}ms**.")
 
@@ -98,7 +98,7 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
     @commands.command(help="See our partnership with GalaxyNodes")
     async def sponsor(self, ctx):
         embed = diskord.Embed(
-            title="RedEagle's Sponsor",
+            title="RedEagle's sponsor",
             description="Me, Tommodev#9134, and GalaxyNodes, RedEagle's hosting service, decided to make a "
                         "partnership. GalaxyNodes is a hosting service for Discord Bot and also Minecraft Servers! If "
                         "you need a cheap and fast host, I recommend you to join their server [here]("
@@ -111,15 +111,15 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
     @commands.command(help="Get information about RedEagle", aliases=["info"])
     async def stats(self, ctx):
         embed = diskord.Embed(
-            title=f"Info and Stats about RedEagle",
+            title=f"Info and stats about RedEagle",
             description=f"""
-**Bot Info**
-<:developer:918867639886049301> Tommodev#9134
+**Info**
+<:developer:918867639886049301> Tommodev#0001
 <:python:918867852176551966> Developed in Python
-<:terminal:918868581150756894> Prefixes: `re!` | `Re!` | `@mention `
+<:terminal:918868581150756894> Prefixes: `re!` | `Re!`
 <:file_upload:918872362336804895> Version: `{botversion}`
 
-**Bot Stats**
+**Stats**
 <:time:918871014182625281> Latency: `{round(self.client.latency * 1000, 1)}ms`
 <:server:918872745033490482> Servers: `{len(self.client.guilds)} servers`
 <:users:918873187670970389> Users: `{sum([len(guild.members) for guild in self.client.guilds])} users`

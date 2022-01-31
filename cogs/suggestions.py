@@ -14,18 +14,6 @@ class Suggestions(commands.Cog, description="Suggestion commands"):
     async def suggest(self, ctx):
         pass
 
-    @suggest.command(help="Available commands for the suggestion system")
-    async def help(self, ctx):
-        embed = diskord.Embed(
-            title="Suggestion commands",
-            color=embed_color
-        )
-        embed.add_field(name="re!suggest channel <#channel>", value="Set the channel for suggestions.",
-                        inline=False)
-        embed.add_field(name="re!suggest send <suggestion>", value="Submit a suggestion for the server.")
-
-        await ctx.send(embed=embed)
-
     @suggest.command(help="Set the channel for suggestions")
     async def channel(self, ctx, channel: diskord.TextChannel):
         global sql, val

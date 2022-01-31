@@ -100,7 +100,7 @@ class Moderation(commands.Cog, description="Moderation commands"):
 
         await ctx.send(embed=embed)
 
-    @commands.command(help="ban a user")
+    @commands.command(help="Ban a user")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: commands.MemberConverter, *, reason: str = None):
         if member == ctx.author:

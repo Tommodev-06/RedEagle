@@ -1,12 +1,12 @@
 import diskord
 from diskord.ext import commands
 import os
-from dotenv import load_dotenv
+import dotenv
 from itertools import cycle
 from asyncio import sleep
 
 client = commands.Bot(
-    command_prefix=["re!", "Re!", "<@856643485340139580> ", "<@!856643485340139580> "],
+    command_prefix=["re!", "Re!"],
     case_insensitive=True,
     intents=diskord.Intents.all()
 )
@@ -34,6 +34,6 @@ for file in os.listdir("./cogs"):
     if file.endswith(".py"):
         client.load_extension(f"cogs.{file[:-3]}")
 
-load_dotenv()
+dotenv.load_dotenv()
 
 client.run(os.getenv("TOKEN"))
