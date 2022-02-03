@@ -6,11 +6,11 @@ from itertools import cycle
 from asyncio import sleep
 
 client = commands.Bot(
-    command_prefix=["re!", "Re!"],
+    command_prefix=commands.when_mentioned_or("re!"),
     case_insensitive=True,
-    intents=diskord.Intents.all()
+    intents=diskord.Intents.all(),
+    help_command=None
 )
-client.remove_command("help")
 
 async def change_status():
     statuses = cycle(
