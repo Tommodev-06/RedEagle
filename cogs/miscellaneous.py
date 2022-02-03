@@ -149,7 +149,10 @@ class Miscellaneous(commands.Cog, description="Miscellaneous commands"):
             embed.set_footer(text=f"User ID: {ctx.author.id}")
 
             await ctx.send("Suggestion successfully submitted!")
-            await channel.send(embed=embed)
+            message = await channel.send(embed=embed)
+
+            await message.add_reaction("✅")
+            await message.add_reaction("❌")
 
     @commands.command(help="See what's new in the latest version of RedEagle")
     async def changelog(self, ctx):

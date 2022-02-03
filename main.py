@@ -8,7 +8,7 @@ from asyncio import sleep
 client = commands.Bot(
     command_prefix=["re!", "Re!"],
     case_insensitive=True,
-    intents=diskord.Intents.all()
+    intents=diskord.Intents(guilds=True, members=True, messages=True)
 )
 client.remove_command("help")
 

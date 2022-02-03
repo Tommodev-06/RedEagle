@@ -5,13 +5,11 @@ from contextlib import suppress
 
 fail = "<a:fail:866017479696318534>"
 
-
 class ServerButton(diskord.ui.View):
     def __init__(self):
         super().__init__()
 
         self.add_item(diskord.ui.Button(label="Official Server", url="https://discord.gg/tTTuNRwRYJ"))
-
 
 class Errors(commands.Cog):
     def __init__(self, client):
