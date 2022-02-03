@@ -5,7 +5,7 @@ import dotenv
 from itertools import cycle
 from asyncio import sleep
 
-client = commands.Bot(
+client = commands.AutoShardedBot(
     command_prefix=commands.when_mentioned_or(lambda bot,msg:msg.content.lower()=="re!"),
     case_insensitive=True,
     intents=diskord.Intents.all(),
