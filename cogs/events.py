@@ -1,6 +1,14 @@
-import diskord
-from diskord.ext import commands
+import discord
+from discord.ext import commands
 import datetime
+
+class InviteButton(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+
+        invite_url = "https://discord.com/api/oauth2/authorize?client_id=856643485340139580&permissions=8&scope=bot%20applications.commands"
+
+        self.add_item(discord.ui.Button(label="Invite", url=invite_url))
 
 class Events(commands.Cog):
     def __init__(self, client):
@@ -11,19 +19,23 @@ class Events(commands.Cog):
         if message.author.id == self.client.user.id:
             return
 
-        if (
-                message.content == f"<@!{self.client.user.id}>"
-                or message.content == f"<@{self.client.user.id}>"
-        ):
-            await message.channel.send(
-                "My prefix is `re!`. Type `re!help` to see the available commands."
+        if message.content == f"<@!{self.client.user.id}>" or message.content == f"<@{self.client.user.id}>":
+            await message.reply(
+                "Hello, this is RedEagle! Run `/help` to see available commands.\nIf you don't see RedEagle in the "
+                "list of slash commands, reinvite it with the button below!", view=InviteButton()
+            )
+        elif "re!" in message.content or "Re!" in message.content:
+            await message.reply(
+                f"Hey **{message.author.name}**, from now I use slash commands! Run `/help` to see available commands.\n"
+                "If you don't see RedEagle in the list of slash commands, reinvite it with the button below!",
+                view=InviteButton()
             )
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         channel = await self.client.fetch_channel(869313065441701919)
 
-        embed = diskord.Embed(
+        embed = discord.Embed(
             title="Joined a server!",
             description=f"I joined **{guild.name}** right now and I'm in **{len(self.client.guilds)} servers** now!",
             color=0xF00C0C
@@ -32,7 +44,7 @@ class Events(commands.Cog):
 
         await channel.send("Hey <@825292137338765333>, I joined a new server!", embed=embed)
 
-        muted_role = diskord.utils.get(guild.roles, name="Muted")
+        muted_role = discord.utils.get(guild.roles, name="Muted")
 
         if muted_role:
             return
@@ -47,7 +59,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
-        muted_role = diskord.utils.get(channel.guild.roles, name="Muted")
+        muted_role = discord.utils.get(channel.guild.roles, name="Muted")
 
         overwrite = channel.overwrites_for(muted_role)
         overwrite.send_messages = False

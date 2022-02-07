@@ -1,226 +1,234 @@
-import diskord
-from diskord.ext import commands
+import discord
+from discord.ext import commands
+from discord.commands import slash_command, Option
 import datetime
 import humanfriendly
+import asyncio
 
 embed_color = 0xF00C0C
-prefix = "re!"
-success = "<a:success:865522277729566741>"
-fail = "<a:fail:866017479696318534>"
+success = "<:mod_success:908415224544100362>"
+fail = "<:mod_fail:908415224657375293>"
 
-class Moderation(commands.Cog, description="Moderation commands"):
+class Moderation(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(help="Lock a text channel")
-    @commands.has_permissions(manage_channels=True)
-    async def lock(self, ctx, channel: diskord.TextChannel = None):
-        channel = channel or ctx.channel
-        role = ctx.guild.default_role
-        perms = channel.permissions_for(role)
+    @slash_command(description="Lock a text channel.")
+    @commands.has_permissions(manage_messages=True)
+    async def lock(
+            self,
+            ctx,
+            channel: Option(discord.TextChannel, "Channel to be locked.", required=False),
+            reason: Option(str, "Reason for locking the channel.", required=False, default=None)
+    ):
+        channel = ctx.channel or channel
 
-        await ctx.send(f"{success} Successfully locked {channel.mention}", delete_after=2)
+        overwrite = channel.overwrites_for(ctx.guild.default_role)
+        overwrite.send_messages = False
 
-        if not perms.view_channel:
-            await channel.set_permissions(role, view_channel=False, send_messages=False)
-        else:
-            await channel.set_permissions(role, send_messages=False)
+        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
+        await ctx.respond(f"{success} Successfully locked {channel.mention}",
+                          ephemeral=True)
 
-        embed = diskord.Embed(
+        embed = discord.Embed(
             title="Channel locked",
             description=f"This channel was locked by {ctx.author.mention} 🔒",
             color=embed_color
         )
-        embed.timestamp = datetime.datetime.utcnow()
+        embed.add_field(name="Reason", value=reason)
 
         await channel.send(embed=embed)
 
-    @commands.command(help="Unlock a text channel")
-    @commands.has_permissions(manage_channels=True)
-    async def unlock(self, ctx, channel: diskord.TextChannel = None):
-        channel = channel or ctx.channel
-        role = ctx.guild.default_role
-        perms = channel.permissions_for(role)
+    @slash_command(description="Unlock a text channel.")
+    @commands.has_permissions(manage_messages=True)
+    async def unlock(
+            self,
+            ctx,
+            channel: Option(discord.TextChannel, "Channel to be unlocked.", required=False),
+            reason: Option(str, "Reason for unlocking the channel.", required=False, default=None)
+    ):
+        channel = ctx.channel or channel
 
-        await ctx.send(f"{success} Successfully unlocked {channel.mention}", delete_after=2)
+        overwrite = channel.overwrites_for(ctx.guild.default_role)
+        overwrite.send_messages = True
 
-        if not perms.view_channel:
-            await channel.set_permissions(role, view_channel=False, send_messages=True)
-        else:
-            await channel.set_permissions(role, send_messages=False)
+        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
+        await ctx.respond(f"{success} Successfully unlocked {channel.mention}",
+                          ephemeral=True)
 
-        embed = diskord.Embed(
+        embed = discord.Embed(
             title="Channel unlocked",
             description=f"This channel was unlocked by {ctx.author.mention} 🔓",
             color=embed_color
         )
-        embed.timestamp = datetime.datetime.utcnow()
+        embed.add_field(name="Reason", value=reason)
 
         await channel.send(embed=embed)
 
-    @commands.command(help="Kick a user")
+    @slash_command(description="Kick a user.")
     @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: commands.MemberConverter, *, reason: str = None):
-        if member == ctx.author:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} You can't kick yourself!", delete_after=3)
+    async def kick(
+            self,
+            ctx,
+            user: Option(discord.Member, "User to be kicked."),
+            reason: Option(str, "Reason of the kick.", required=False, default=None)
+    ):
+        if user == ctx.author:
+            await ctx.respond(f"{fail} You can't kick yourself", ephemeral=True)
             return
-        elif member.top_role >= ctx.author.top_role or member == ctx.guild.owner:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} That user is above you or he/she is the owner of {ctx.guild}, so you can't kick "
-                           f"him/her.",
-                           delete_after=4.5)
+
+        if user.top_role > ctx.author.top_role or user.top_role == ctx.author.top_role or user == ctx.guild.owner:
+            await ctx.respond(f'{fail} That user is above you or he/she is the owner of "{ctx.guild}", ',
+                              "so you can't kick them.", ephemeral=True)
             return
-        elif member.id == self.client.user.id:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} I can't kick myself!", delete_after=3)
+
+        elif user.id == self.client.user.id:
+            await ctx.respond(f"{fail} I can't kick myself!", ephemeral=True)
             return
-        elif ctx.guild.me.top_role <= member.top_role:
-            await ctx.message.delete()
-            await ctx.send(
+
+        elif ctx.guild.me.top_role <= user.top_role:
+            await ctx.respond(
                 f"{fail} The user has a higher role or the same top role as mine.\n"
-                + "Please move my role higher!", delete_after=3
+                "Please move my role higher!", ephemeral=True
             )
             return
 
         try:
-            await member.send(f"You were kicked from {ctx.guild}! Reason: {reason}.")
+            await user.send(f'You were kicked from "{ctx.guild}". Reason: {reason}.')
         except:
             pass
 
-        await ctx.guild.kick(member, reason=f"Kicked by {ctx.author}. Reason: {reason}")
+        await ctx.guild.kick(user, reason=f"Kicked by {ctx.author}. Reason: {reason}.")
 
-        embed = diskord.Embed(
+        embed = discord.Embed(
             title="User kicked",
-            description=f"{member.mention} was kicked by {ctx.author.mention}.",
+            description=f"{user.mention} was kicked by {ctx.author.mention}.",
             color=embed_color
         )
         embed.add_field(name="Reason", value=reason)
-        embed.timestamp = datetime.datetime.utcnow()
 
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-    @commands.command(help="Ban a user")
+    @slash_command(description="Ban a user.")
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: commands.MemberConverter, *, reason: str = None):
-        if member == ctx.author:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} You can't ban yourself!", delete_after=3)
+    async def ban(
+            self,
+            ctx,
+            user: Option(discord.Member, "User to be banned."),
+            reason: Option(str, "Reason of the ban.", required=False, default=None)
+    ):
+        if user == ctx.author:
+            await ctx.respond(f"{fail} You can't ban yourself", ephemeral=True)
             return
-        elif member.top_role >= ctx.author.top_role or member == ctx.guild.owner:
-            await ctx.message.delete()
-            await ctx.send(
-                f"{fail} That user is above you or he/she is the owner of {ctx.guild}, so you can't ban him/her.",
-                delete_after=4.5)
+
+        if user.top_role > ctx.author.top_role or user.top_role == ctx.author.top_role or user == ctx.guild.owner:
+            await ctx.respond(f'{fail} That user is above you or he/she is the owner of "{ctx.guild}", ',
+                              "so you can't ban them.", ephemeral=True)
             return
-        elif member.id == self.client.user.id:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} I can't ban myself!", delete_after=3)
+
+        elif user.id == self.client.user.id:
+            await ctx.respond(f"{fail} I can't ban myself!", ephemeral=True)
             return
-        elif ctx.guild.me.top_role <= member.top_role:
-            await ctx.message.delete()
-            await ctx.send(
+
+        elif ctx.guild.me.top_role <= user.top_role:
+            await ctx.respond(
                 f"{fail} The user has a higher role or the same top role as mine.\n"
-                + "Please move my role higher!", delete_after=3
+                "Please move my role higher!", ephemeral=True
             )
             return
 
         try:
-            await member.send(f"You were banned from {ctx.guild}! Reason: {reason}.")
+            await user.send(f'You were banned from "{ctx.guild}". Reason: {reason}.')
         except:
             pass
 
-        await ctx.guild.ban(member, reason=f"Banned by {ctx.author}. Reason: {reason}")
+        await ctx.guild.ban(user, reason=f"Banned by {ctx.author}. Reason: {reason}.")
 
-        embed = diskord.Embed(
+        embed = discord.Embed(
             title="User banned",
-            description=f"{member.mention} was banned by {ctx.author.mention}.",
+            description=f"{user.mention} was banned by {ctx.author.mention}.",
             color=embed_color
         )
         embed.add_field(name="Reason", value=reason)
-        embed.timestamp = datetime.datetime.utcnow()
 
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-    async def mute_checker(self, ctx, bot_role, member, muted_role):
+    async def mute_checker(self, ctx, bot_role, user, muted_role):
         bot_role = ctx.guild.me.top_role
-        muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
 
-        if member == ctx.author:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} You can't mute yourself!", delete_after=3)
+        if user == ctx.author:
+            await ctx.respond(f"{fail} You can't mute yourself!", ephemeral=True)
             return False
-        elif member == self.client.user:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} I can't mute myself!", delete_after=3)
+
+        if user == self.client.user:
+            await ctx.respond(f"{fail} I can't mute myself!", ephemeral=True)
             return False
-        elif bot_role <= member.top_role:
-            await ctx.message.delete()
-            await ctx.send(
+
+        if bot_role <= user.top_role:
+            await ctx.respond(
                 f"{fail} The user has a higher role or the same top role as mine.\n"
-                + "Please move my role higher!", delete_after=3
+                "Please move my role higher!", ephemeral=True
             )
-            return False
-        elif member.guild_permissions.administrator:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} This user has `Adminstrator` perms in this server, so you can't mute him/her.",
-                           delete_after=3)
-            return False
-        elif member.top_role > ctx.author.top_role or member.top_role == ctx.author.top_role or member == ctx.guild.owner:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} That user is above you or he/she is the wwner of {ctx.guild}, "
-                           "so you can't mute him/her.", delete_after=3)
-            return False
-        elif bot_role <= muted_role:
-            await ctx.message.delete()
-            await ctx.send(
-                f"{fail} My role is too low. I can only mute users if my role is higher than "
-                "the Muted role!", delete_after=3
-            )
-            return False
-        elif muted_role in member.roles:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} This user is muted yet!", delete_after=3)
             return False
 
-    @commands.command(help="Mute a user")
+        if user.guild_permissions.administrator:
+            await ctx.respond(f"{fail} This user has administrator perms in this server, "
+                              "so you can't mute them.", ephemeral=True)
+            return False
+
+        if user.top_role > ctx.author.top_role or user.top_role == ctx.author.top_role or user == ctx.guild.owner:
+            await ctx.respond(f'{fail} That user is above you or he/she is the owner of "{ctx.guild}", ',
+                              "so you can't mute them.", ephemeral=True)
+            return False
+
+        if bot_role <= muted_role:
+            await ctx.respond(
+                f"{fail} My role is too low. I can only mute users if my role is higher than "
+                "the Muted role!", ephemeral=True
+            )
+            return False
+
+    @slash_command(description="Mute a user.")
     @commands.has_permissions(manage_roles=True)
-    async def mute(self, ctx, member: commands.MemberConverter, *, reason: str = None):
-        muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
+    async def mute(
+            self,
+            ctx,
+            user: Option(discord.Member, "User to be muted."),
+            reason: Option(str, "Reason of the mute.", required=False, default=None)
+    ):
+        muted_role = discord.utils.get(ctx.guild.roles[::-1], name="Muted")
 
         if (
-                await self.mute_checker(ctx, ctx.guild.me.top_role, member, muted_role)
+                await self.mute_checker(ctx, ctx.guild.me.top_role, user, muted_role)
                 == False
         ):
             return
         else:
-            await member.add_roles(muted_role, reason=f"Muted by {ctx.author}. Reason: {reason}")
+            await user.add_roles(muted_role, reason=f"Muted by {ctx.author}. Reason: {reason}.")
 
-            embed = diskord.Embed(
+            embed = discord.Embed(
                 title="User muted",
-                description=f"{member.mention} was muted by {ctx.author.mention}.",
+                description=f"{user.mention} was muted by {ctx.author.mention}.",
                 color=embed_color
             )
             embed.add_field(name="Reason", value=reason)
 
-            await ctx.send(embed=embed)
+            await ctx.respond(embed=embed)
+            await user.send(f'You were muted in "{ctx.guild}". Reason: {reason}.')
 
-            embeddm = diskord.Embed(
-                title="You were muted",
-                description=f"You were muted in **{ctx.guild}** by **{ctx.author}**.",
-                color=0x538AEE
-            )
-            embeddm.add_field(name="Reason", value=reason)
-
-            await member.send(embed=embeddm)
-
-    @commands.command(help="Tempmute a user", aliases=["tmute"])
+    @slash_command(description="Temporarily mute a user.")
     @commands.has_permissions(manage_roles=True)
-    async def tempmute(self, ctx, member: commands.MemberConverter, time: str, *, reason: str = None):
-        muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
+    async def tempmute(
+            self,
+            ctx,
+            user: Option(discord.Member, "Member to be temporarily muted."),
+            time: Option(str, "Tempmute duration."),
+            reason: Option(str, "Reason of the tempmute.", required=False, default=None)
+    ):
+        muted_role = discord.utils.get(ctx.guild.roles[::-1], name="Muted")  # Just for the lines below.
 
         if (
-                await self.mute_checker(ctx, ctx.guild.me.top_role, member, muted_role)
+                await self.mute_checker(ctx, ctx.guild.me.top_role, user, muted_role)
                 == False
         ):
             return
@@ -228,116 +236,115 @@ class Moderation(commands.Cog, description="Moderation commands"):
         if "s" or "m" or "d" or "w" in str(time):
             time = humanfriendly.parse_timespan(time)
             if time > 604800:
-                await ctx.send("The max value is one week.")
+                await ctx.respond("The max value is one week (`7d` or `1w`).", ephemeral=True)
                 return
             else:
                 now = datetime.datetime.utcnow()
                 until = now + datetime.timedelta(seconds=time)
 
-                await member.edit(communication_disabled_until=until, reason=f"Muted by {ctx.author}. Reason: {reason}")
+                await user.timeout(until, reason=f"Temporarily muted by {ctx.author}. Reason: {reason}.")
 
-                embed = diskord.Embed(
-                    title="Member muted",
-                    description=f"{member.mention} was muted by {ctx.author.mention}.",
+                embed = discord.Embed(
+                    title="User muted",
+                    description=f"{user.mention} was temporarily muted by {ctx.author.mention}.",
                     color=embed_color
                 )
                 embed.add_field(name="Reason", value=reason)
 
-                await ctx.send(embed=embed)
+                await ctx.respond(embed=embed)
+                await user.send(f'You were temporarily muted in "{ctx.guild}". Reason: {reason}')
 
     @tempmute.error
     async def tempmute_error(self, ctx, time):
         if "s" or "m" or "d" or "y" not in str(time):
-            await ctx.send(
-                "Invalid durantion. You can use `s` for seconds, `m` for minutes, `d` for days and `w` for weeks."
+            await ctx.respond(
+                "Invalid durantion. You can use `s` for seconds, `m` for minutes, `d` for days and `w` for weeks.",
+                ephemeral=True
             )
             return
 
-    @commands.command(help="Unmute a user")
-    async def unmute(self, ctx, member: commands.MemberConverter):
-        muted_role = diskord.utils.get(ctx.guild.roles[::-1], name="Muted")
+    @slash_command(description="Unmute a user.")
+    async def unmute(
+            self,
+            ctx,
+            user: Option(discord.Member, "Member to be unmuted.")
+    ):
+        muted_role = discord.utils.get(ctx.guild.roles[::-1], name="Muted")
 
         if ctx.guild.me.top_role <= muted_role:
-            await ctx.message.delete()
-            await ctx.send(
+            await ctx.respond(
                 f"{fail} My role is too low. I can only unmute users if my role is higher than "
-                "the Muted role!", delete_after=3
+                "the Muted role!", ephemeral=True
             )
             return
-        elif ctx.guild.me.top_role <= member.top_role:
-            await ctx.message.delete()
+        elif ctx.guild.me.top_role <= user.top_role:
             await ctx.send(
                 f"{fail} The user has a higher role or the same top role as mine.\n"
-                + "Please move my role higher!", delete_after=3
+                "Please move my role higher!", ephemeral=True
             )
             return
 
-        if muted_role in member.roles:
-            await member.remove_roles(muted_role)
+        if muted_role in user.roles:
+            await user.remove_roles(muted_role)
         else:
-            await member.edit(communication_disabled_until=None)
+            await user.remove_timeout()
 
-        embed = diskord.Embed(
+        embed = discord.Embed(
             title="User unmuted",
-            description=f"{member.mention} was unmuted by {ctx.author.mention}.",
+            description=f"{user.mention} was unmuted by {ctx.author.mention}.",
             color=embed_color
         )
 
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-        embeddm = diskord.Embed(
-            title="You were unmuted",
-            description=f"You were unmuted in **{ctx.guild.name}** by **{ctx.author}**.",
-            color=embed_color
-        )
-        await member.send(embed=embeddm)
-
-    @commands.command(help="Clear the specified amount of messages")
+    @slash_command(description="Clear the specified amount of messages.")
     @commands.has_permissions(manage_messages=True)
-    async def clear(self, ctx, amount: int):
+    async def clear(
+            self,
+            ctx,
+            amount: Option(int, "Amount of messages to be deleted.")
+    ):
         messages = []
         async for message in ctx.channel.history(limit=amount + 1):
             messages.append(message)
 
         if amount > 100:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} You can delete up to 100 messages!", delete_after=2)
-            return
-        elif amount <= 0:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} The amount must be a number greater than 0!", delete_after=2)
-            return
+            await ctx.respond(f"{fail} You can delete up to 100 messages!", ephemeral=True)
         else:
             try:
-                await ctx.channel.delete_messages(messages)
-                await ctx.send(f"{len(messages) - 1} messages have been deleted by {ctx.author}.", delete_after=3)
-            except diskord.Forbidden:
-                await ctx.send(
-                    f"{fail} Due to Discord's ToS, you can't delete messages that are more than 14 days old.",
-                    delete_after=3
-                )
+                await ctx.channel.purge(limit=amount)
+                await ctx.respond(f"{success} {len(messages)} messages have been deleted.")
 
-    @commands.command(help="Set the slowmode to the specified seconds", aliases=["sm"])
+                await asyncio.sleep(1.5)
+                await ctx.interaction.delete_original_message()
+            except:
+                await ctx.respond(f"{fail} Due to Discord's ToS, you can't delete messages that "
+                                  "are more than 14 days old.", ephemeral=True)
+                return
+
+    @slash_command(description="Set the slowmode to the specified seconds.")
     @commands.has_permissions(manage_messages=True)
-    async def slowmode(self, ctx, seconds: int):
+    async def slowmode(
+            self,
+            ctx,
+            seconds: Option(int, "Seconds of the slowmode.")
+    ):
         if seconds > 21600:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} Can't set the slowmode to {seconds} seconds because the "
-                           "maximum delay is 6 hours (21600 seconds).", delete_after=3)
+            await ctx.respond(f"{fail} You can't set the slowmode to {seconds} seconds because the "
+                              "maximum delay is 6 hours (21600 seconds).", ephemeral=True)
         elif seconds < 0:
-            await ctx.message.delete()
-            await ctx.send(f"{fail} Can't set the slowmode to {seconds} seconds because "
-                           "seconds must be greater than or equal to 0 (if you put 0, the slowmode will be off).",
-                           delete_after=3)
+            await ctx.respond(f"{fail} You can't set the slowmode to {seconds} seconds because "
+                              "seconds must be greater than or equal to 0 (if you put 0, the slowmode will be off).",
+                              ephemeral=True)
         elif seconds == 1:
             await ctx.channel.edit(slowmode_delay=seconds)
-            await ctx.send(f"{success} Set the slowmode in this channel to `1` second.")
+            await ctx.respond(f"{success} Set the slowmode in this channel to `1` second.")
         elif seconds == 0:
             await ctx.channel.edit(slowmode_delay=seconds)
-            await ctx.send(f"{success} Disabled the slowmode in this channel.")
+            await ctx.respond(f"{success} Disabled the slowmode in this channel.")
         else:
             await ctx.channel.edit(slowmode_delay=seconds)
-            await ctx.send(f"{success} Set the slowmode delay in this channel to `{seconds}` seconds.")
+            await ctx.respond(f"{success} Set the slowmode in this channel to `{seconds}` seconds.")
 
 def setup(client):
     client.add_cog(Moderation(client))

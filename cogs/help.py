@@ -1,126 +1,120 @@
-import diskord
-from diskord.ext import commands
+import discord
+from discord.ext import commands
+from discord.commands import slash_command, Option
 
 embed_color = 0xF00C0C
-
-class HelpDropdown(diskord.ui.Select):
-    def __init__(self, ctx):
-
-        options = [
-            diskord.SelectOption(label="Miscellaneous", description="See all the miscellaneous commands.",
-                                 emoji="<:miscellaneous:918838334292389908>"),
-            diskord.SelectOption(label="Moderation", description="See al the moderation commands.",
-                                 emoji="<:moderation:918837967957663765>"),
-            diskord.SelectOption(label="Suggestions", description="See all the suggestion commands.",
-                                 emoji="<:suggestion:930119666045706260>"),
-            diskord.SelectOption(label="Utilities", description="See all the utilities commands.",
-                                 emoji="<:utilities:924694038177792010>")
-        ]
-
-        super().__init__(placeholder="Select a category...", min_values=1, max_values=1, options=options)
-        self.ctx = ctx
-        self.prefix = ctx.prefix
-
-    async def callback(self, interaction: diskord.Interaction):
-        msg = interaction.message
-
-        if interaction.user != self.ctx.author:
-            await interaction.response.send_message(
-                "This is not your help command.", ephemeral=True
-            )
-            return
-
-        if self.values[0] == "Miscellaneous":
-            embed = diskord.Embed(
-                description=f"""
-
-`{self.prefix}ping` ➜ get the bot's latency.
-`{self.prefix}userinfo [user]` ➜ get information about a user (aliases: `ui`).
-`{self.prefix}serverinfo` ➜ get information about this server (aliases: `si`).
-`{self.prefix}avatar [user]` ➜ get the profile picture of a user (aliases: `av`, `pfp`).
-`{self.prefix}say <text>` ➜ make the bot say something.
-`{self.prefix}embedsay <title> // <description>` ➜ create an embed with your text.
-`{self.prefix}sponsor` ➜ see our partnership with GalaxyNodes.
-`{self.prefix}stats` ➜ get information about RedEagle (aliases: `info`).
-`{self.prefix}submit <suggestion>` ➜ submit a suggestion for the bot.
-`{self.prefix}changelog` ➜ see what's new in the latest version of RedEagle. 
-`{self.prefix}invite` ➜ get the invite link of RedEagle.
-`{self.prefix}support` ➜ get the support server's link.
-`{self.prefix}vote` ➜ vote RedEagle.
-
-            """,
-                color=embed_color
-            )
-
-            await msg.edit(content="<:miscellaneous:918838334292389908> **Miscellaneous commands**", embed=embed)
-
-        elif self.values[0] == "Moderation":
-            embed = diskord.Embed(
-                description=f"""
-
-`{self.prefix}lock <#channel>` ➜ lock a text channel.
-`{self.prefix}unlock <#channel>` ➜ unlock a text channel.
-`{self.prefix}kick <user> [reason]` ➜ kick a user.
-`{self.prefix}ban <user> [reason]` ➜ ban a user.
-`{self.prefix}mute <user> [reason]` ➜ mute a user.
-`{self.prefix}tempmute <user> <duration> [reason]` ➜ tempmute a user (aliases: `tmute`).
-`{self.prefix}unmute <user>` ➜ unmute a user.
-`{self.prefix}clear <amount>` ➜ clear the specified amount of messages.
-`{self.prefix}slowmode <seconds>` ➜ set the slowmode to the specified seconds.
-
-            """,
-                color=embed_color
-            )
-
-            await msg.edit(content="<:moderation:918837967957663765> **Moderation commands**", embed=embed)
-
-        elif self.values[0] == "Suggestions":
-            embed = diskord.Embed(
-                description=f"""
-
-`{self.prefix}suggest channel <#channel>` ➜ set the channel for suggestions.
-`{self.prefix}suggest send <suggestion>` ➜ submit a suggestion for the server.
-
-                """,
-                color=embed_color
-            )
-
-            await msg.edit(content="<:suggestion:930119666045706260> **Suggestion commands**", embed=embed)
-
-        elif self.values[0] == "Utilities":
-            embed = diskord.Embed(
-                description=f"""
-
-`{self.prefix}calc <num_1> <operation> <num_2>` ➜ perform a mathematical operation.
-`{self.prefix}raw [message_id]` ➜ get raw text of a message (you can reply to a message).
-`{self.prefix}poll <question> <options>` ➜ create a poll with a maximum of 10 options.
-Example: `{self.prefix}poll "Do you like the bot?" Yes, a lot! // Yeah // No`
-`{self.prefix}addrole <user> <role>` ➜ add a role to a user (aliases: `ar`).
-`{self.prefix}removerole <user> <role>` ➜ remove a role from a user (aliases: `rr`).
-
-            """,
-                color=embed_color
-            )
-
-            await msg.edit(content="<:utilities:924694038177792010> **Utilities commands**", embed=embed)
-
-class HelpDropdownView(diskord.ui.View):
-    def __init__(self, ctx):
-        super().__init__()
-        self.ctx = ctx
-
-        self.add_item(HelpDropdown(ctx))
 
 class Help(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
-    async def help(self, ctx):
-        await ctx.send(
-            "Select the category to show commands for.\nIf an argument is in <angle brackets>, "
-            "it's required. If it is in [squared brackets], it's optional.", view=HelpDropdownView(ctx)
-        )
+    @slash_command(description="See the available commands of RedEagle.")
+    async def help(
+            self,
+            ctx,
+            category: Option(str, "Category to show available commands.",
+                             choices=[
+                                 "Fun", "Miscellaneous", "Moderation", "Suggestion system", "Ticket system",
+                                 "Utilities", "Welcome system"
+                             ])
+    ):
+        global embed
+
+        if category == "Fun":
+            embed = discord.Embed(
+                title="Fun commands",
+                description="""
+`/mock <text>` ➜ mOcK tExT (alternating upper and lower case).
+`/reverse <text>` ➜ unlock a text channel.
+`/bored` ➜ suggests you something to do if you're bored.
+`/meme [subreddit]` ➜ get a random meme from Reddit.
+`/8ball <question>` ➜ ask the magic 8-ball a question.
+`/flip` ➜ flip a coin.
+`/roll` ➜ roll a dice.             
+                """,
+                color=embed_color
+            )
+        elif category == "Miscellaneous":
+            embed = discord.Embed(
+                title="Miscellaneous commands",
+                description="""
+`/ping` ➜ see the bot's latency.
+`/userinfo [user]` ➜ get information about a user.
+`/serverinfo` ➜ get information about this server.
+`/avatar [user]` ➜ get the profile picture of a user.
+`/say <text>` ➜ make the bot say something.
+`/embedsay <title> <description>` ➜ create an embed with your text.
+`/sponsor` ➜ see our partnership with GalaxyNodes.
+`/stats` ➜ get information about RedEagle.
+`/advice <suggestion>` ➜ submit a suggestion for the bot.
+`/changelog` ➜ see what's new in the latest version of RedEagle.
+`/invite` ➜ get the invite link of RedEagle.
+`/support` ➜ get the support server's link.
+`/vote` ➜ vote RedEagle.             
+                """,
+                color=embed_color
+            )
+        elif category == "Moderation":
+            embed = discord.Embed(
+                title="Moderation commands",
+                description="""
+`/lock [channel] [reason]` ➜ lock a text channel.
+`/unlock [channel] [reason]` ➜ unlock a text channel.
+`/kick <user> [reason]` ➜ kick a user.
+`/ban <user> [reason]` ➜ ban a user.
+`/mute <user> [reason]` ➜ mute a user.
+`/tempmute <user> <duration> [reason]` ➜ temporarily mute a user.
+`/unmute <user>` ➜ unmute a user.
+`/clear <amount>` ➜ clear the specified amount of messages.
+`/slowmode <seconds>` ➜ set the slowmode to the specified seconds.            
+                """,
+                color=embed_color
+            )
+        elif category == "Suggestion system":
+            embed = discord.Embed(
+                title="Suggestion system",
+                description="""
+`/suggest channel <channel>` ➜ set the channel for suggestions.
+`/suggest send <channel>` ➜ submit a suggestion for the server.            
+                """,
+                color=embed_color
+            )
+        elif category == "Ticket system":
+            embed = discord.Embed(
+                title="Ticket system",
+                description="""
+`/ticket help` ➜ see the usable commands for the ticket system.
+`/ticket role <role>` ➜ set the role that will have access to tickets.
+`/ticket logs <channel>` ➜ set the logs channel for ticket events.
+`/ticket category <category>` ➜ set the category where tickets will be created.
+`/ticket panel <channel> <title> <description>` ➜ send in a channel the panel for opening tickets.         
+                """,
+                color=embed_color
+            )
+        elif category == "Utilities":
+            embed = discord.Embed(
+                title="Utilities commands",
+                description="""
+`/calculate <num_1> <operation> <num_2>` ➜ perform a mathematical operation.
+`/raw <message_id>` ➜ get the raw text of a message.       
+                """,
+                color=embed_color
+            )
+        elif category == "Welcome system":
+            embed = discord.Embed(
+                title="Welcome system",
+                description="""
+`/welcome help` ➜ see the usable commands for the welcome system.
+`/welcome channel <channel>` ➜ set the channel for welcome messages.
+`/welcome message <message>` ➜ set the welcome message.
+`/welcome disable` ➜ disable the welcome system.  
+                """,
+                color=embed_color
+            )
+
+        embed.set_footer(text="< > Required | [ ] Optional")
+
+        await ctx.respond(embed=embed)
 
 def setup(client):
     client.add_cog(Help(client))
