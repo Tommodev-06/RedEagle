@@ -57,7 +57,7 @@ class Utilities(commands.Cog, description="Utilities commands"):
             await ctx.send("This message has no content.")
             return
 
-        await ctx.send(f"```{message.content}```")
+        await ctx.send(f"```{message.content}```",allowed_mentions=diskord.AllowedMentions.none())
 
     @commands.command(help="Create a poll")
     @commands.has_permissions(manage_messages=True)
