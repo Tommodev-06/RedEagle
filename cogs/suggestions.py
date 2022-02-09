@@ -13,8 +13,8 @@ class Suggestions(commands.Cog, description="Suggestion commands"):
     @commands.group()
     async def suggest(self, ctx):
         pass
-
     @suggest.command(help="Set the channel for suggestions")
+    @commands.has_permissions(manage_guild=True)
     async def channel(self, ctx, channel: diskord.TextChannel):
         global sql, val
 
