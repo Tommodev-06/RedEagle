@@ -158,7 +158,7 @@ class Miscellaneous(commands.Cog):
 <:time:918871014182625281> Latency: `{round(self.client.latency * 1000, 1)}ms`
 <:server:918872745033490482> Servers: `{len(self.client.guilds)} servers`
 <:users:918873187670970389> Users: `{sum([len(guild.members) for guild in self.client.guilds])} users`
-<:list:918876883599368284> Commands: {len(self.client.slash_commands)} commands`
+<:list:918876883599368284> Commands: `42 commands`
             """,
             color=embed_color
         )

@@ -44,6 +44,7 @@ class Welcome(commands.Cog):
         await ctx.respond(embed=embed)
 
     @welcome_group.command(description="Set the channel for welcome messages.")
+    @commands.has_permissions(administrator=True)
     async def channel(
             self,
             ctx,
@@ -70,6 +71,7 @@ class Welcome(commands.Cog):
         cursor.close()
 
     @welcome_group.command(description="Set the welcome message.")
+    @commands.has_permissions(administrator=True)
     async def message(
             self,
             ctx,
@@ -96,6 +98,7 @@ class Welcome(commands.Cog):
         cursor.close()
 
     @welcome_group.command(description="Disable the welcome system.")
+    @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
         db = sqlite3.connect("main.db")
         cursor = db.cursor()

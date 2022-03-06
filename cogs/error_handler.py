@@ -3,7 +3,7 @@ from discord.ext import commands
 from contextlib import suppress
 import traceback
 
-fail = "<:mod_fail:908415224657375293>"
+fail = "<a:fail:866017479696318534>"
 
 class Server(discord.ui.View):
     def __init__(self):

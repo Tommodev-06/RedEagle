@@ -75,7 +75,8 @@ class Help(commands.Cog):
                 title="Suggestion system",
                 description="""
 `/suggest channel <channel>` ➜ set the channel for suggestions.
-`/suggest send <channel>` ➜ submit a suggestion for the server.            
+`/suggest send <channel>` ➜ submit a suggestion for the server.
+`/suggest disable` ➜ disable the suggestion system.          
                 """,
                 color=embed_color
             )

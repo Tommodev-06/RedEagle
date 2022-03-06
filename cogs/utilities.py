@@ -4,7 +4,7 @@ from discord.commands import slash_command, Option
 
 embed_color = 0xF00C0C
 success = "<a:success:865522277729566741>"
-fail = "<:mod_fail:908415224657375293>"
+fail = "<a:fail:866017479696318534>"
 
 class Utilities(commands.Cog, description="Utilities commands"):
     def __init__(self, client):
@@ -67,7 +67,6 @@ class Utilities(commands.Cog, description="Utilities commands"):
             return
 
         await ctx.respond(f"```{message.content}```")
-
 
 def setup(client):
     client.add_cog(Utilities(client))

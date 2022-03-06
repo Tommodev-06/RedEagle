@@ -198,6 +198,7 @@ class Tickets(commands.Cog):
         await ctx.respond(embed=embed)
 
     @tickets_group.command(description="Set the role that will have access to tickets.")
+    @commands.has_permissions(administrator=True)
     async def role(
             self,
             ctx,
@@ -222,6 +223,7 @@ class Tickets(commands.Cog):
         cursor.close()
 
     @tickets_group.command(description="Set the logs channel for ticket events.")
+    @commands.has_permissions(administrator=True)
     async def logs(
             self,
             ctx,
@@ -246,6 +248,7 @@ class Tickets(commands.Cog):
         cursor.close()
 
     @tickets_group.command(description="Set the category where tickets will be created.")
+    @commands.has_permissions(administrator=True)
     async def category(
             self,
             ctx,
@@ -270,6 +273,7 @@ class Tickets(commands.Cog):
         cursor.close()
 
     @tickets_group.command(description="Send in a channel the panel for opening tickets.")
+    @commands.has_permissions(administrator=True)
     async def panel(
             self,
             ctx,

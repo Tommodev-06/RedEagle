@@ -4,7 +4,7 @@ from discord.commands import slash_command, Option
 import requests
 import random
 
-fail = "<:mod_fail:908415224657375293>"
+fail = "<a:fail:866017479696318534>"
 
 class Fun(commands.Cog):
     def __init__(self, client):
@@ -32,6 +32,8 @@ class Fun(commands.Cog):
 
     @slash_command(description="Suggests you something to do if you're bored.")
     async def bored(self, ctx):
+        await ctx.defer()
+
         r = requests.get("https://www.boredapi.com/api/activity?participants=1&price=0")
 
         if r.status_code != 200:
@@ -49,6 +51,8 @@ class Fun(commands.Cog):
             ctx,
             subreddit: Option(str, "Subreddit of the meme.", required=False, default=None)
     ):
+        await ctx.defer()
+
         if subreddit:
             json = requests.get(
                 f"https://meme-api.herokuapp.com/gimme/{subreddit}"

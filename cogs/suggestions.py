@@ -14,6 +14,7 @@ class Suggestions(commands.Cog):
     suggest_group = SlashCommandGroup("suggest", "Setup the suggestion system for your server")
 
     @suggest_group.command(description="Set the channel for suggestions.")
+    @commands.has_permissions(administrator=True)
     async def channel(
             self,
             ctx,
@@ -79,6 +80,18 @@ class Suggestions(commands.Cog):
                 await message.add_reaction("❌")
 
                 await ctx.respond(f"Suggestion successfully submitted in {channel.mention}!", ephemeral=True)
+
+    @suggest_group.command(description="Disable the suggestion system.")
+    @commands.has_permissions(administrator=True)
+    async def disable(self, ctx):
+        db = sqlite3.connect("main.db")
+        cursor = db.cursor()
+        cursor.execute(f"DELETE FROM Suggestions WHERE guild_id = {ctx.guild.id}")
+
+        await ctx.respond("The suggestion system has been disabled.")
+
+        db.commit()
+        cursor.close()
 
 def setup(client):
     client.add_cog(Suggestions(client))
