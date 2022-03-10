@@ -146,20 +146,21 @@ class Miscellaneous(commands.Cog):
 
     @slash_command(description="Get information about RedEagle.")
     async def stats(self, ctx):
+        developer = self.client.get_user(825292137338765333)
+        
         embed = discord.Embed(
             title=f"Info and statistics on RedEagle",
             description=f"""
 **Info**
-<:developer:918867639886049301> Tommodev#0001
+<:developer:918867639886049301> {developer}
 <:python:918867852176551966> Developed in Python
-<:terminal:918868581150756894> Prefixes: `re!` | `Re!`
+<:terminal:918868581150756894> Prefix: `/` (slash commands)
 <:file_upload:918872362336804895> Version: `0.5`
 
 **Statistics**
 <:time:918871014182625281> Latency: `{round(self.client.latency * 1000, 1)}ms`
 <:server:918872745033490482> Servers: `{len(self.client.guilds)} servers`
 <:users:918873187670970389> Users: `{sum([len(guild.members) for guild in self.client.guilds])} users`
-<:list:918876883599368284> Commands: `42 commands`
             """,
             color=embed_color
         )
