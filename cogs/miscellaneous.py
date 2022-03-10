@@ -182,11 +182,14 @@ class Miscellaneous(commands.Cog):
                 description=f"{suggestion}",
                 color=embed_color
             )
-            embed.set_author(name=f"{ctx.author}", icon_url=f"{ctx.author.avatar}")
+            embed.set_author(name=f"{ctx.author}", icon_url=f"{ctx.author.display_avatar}")
             embed.set_footer(text=f"User ID: {ctx.author.id}")
 
             await ctx.respond("Suggestion successfully submitted!")
-            await channel.send(embed=embed)
+            message = await channel.send(embed=embed)
+            
+            await message.add_reaction("✅")
+            await message.add_reaction("❌")
 
     @slash_command(description="See what's new in the latest version of RedEagle.")
     async def changelog(self, ctx):
