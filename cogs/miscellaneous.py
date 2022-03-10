@@ -92,13 +92,14 @@ class Miscellaneous(commands.Cog):
             user: Option(discord.Member, "User whose avatar to show.", required=False)
     ):
         user = user or ctx.author
-
+        
+            
         embed = discord.Embed(
             title=f"Avatar of {user.name}",
-            description=f"The avatar of {user} is available at this [link]({user.avatar}).",
+            description=f"The avatar of {user} is available at this [link]({user.display_avatar}).",
             color=embed_color
         )
-        embed.set_image(url=f"{user.avatar}")
+        embed.set_image(url=f"{user.display_avatar}")
 
         await ctx.respond(embed=embed)
 
