@@ -6,7 +6,7 @@ import humanfriendly
 import asyncio
 
 embed_color = 0xF00C0C
-success = "<a:success:865522277729566741"
+success = "<a:success:865522277729566741>"
 fail = "<a:fail:866017479696318534>"
 
 class Moderation(commands.Cog):
