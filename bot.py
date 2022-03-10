@@ -6,7 +6,7 @@ from itertools import cycle
 from asyncio import sleep
 from cogs.tickets import NewTicket
 
-client = discord.Bot(intents=discord.Intents(guilds=True))
+client = discord.Bot(intents=discord.Intents(guilds=True, members=True, messages=True))
 client.persistent_views_added = False
 
 async def change_status():
