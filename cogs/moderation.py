@@ -6,7 +6,7 @@ import humanfriendly
 import asyncio
 
 embed_color = 0xF00C0C
-success = "<a:success:865522277729566741"
+success = "<a:success:865522277729566741>"
 fail = "<a:fail:866017479696318534>"
 
 class Moderation(commands.Cog):
@@ -27,7 +27,7 @@ class Moderation(commands.Cog):
         overwrite.send_messages = False
 
         await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
-        await ctx.respond(f"{success} Successfully locked {channel.mention}",
+        await ctx.respond(f"{success} Successfully locked {channel.mention}.",
                           ephemeral=True)
 
         embed = discord.Embed(
@@ -53,7 +53,7 @@ class Moderation(commands.Cog):
         overwrite.send_messages = True
 
         await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
-        await ctx.respond(f"{success} Successfully unlocked {channel.mention}",
+        await ctx.respond(f"{success} Successfully unlocked {channel.mention}.",
                           ephemeral=True)
 
         embed = discord.Embed(
@@ -118,7 +118,7 @@ class Moderation(commands.Cog):
             reason: Option(str, "Reason of the ban.", required=False, default=None)
     ):
         if user == ctx.author:
-            await ctx.respond(f"{fail} You can't ban yourself", ephemeral=True)
+            await ctx.respond(f"{fail} You can't ban yourself.", ephemeral=True)
             return
 
         if user.top_role > ctx.author.top_role or user.top_role == ctx.author.top_role or user == ctx.guild.owner:
@@ -252,13 +252,13 @@ class Moderation(commands.Cog):
                 embed.add_field(name="Reason", value=reason)
 
                 await ctx.respond(embed=embed)
-                await user.send(f'You were temporarily muted in "{ctx.guild}". Reason: {reason}')
+                await user.send(f'You were temporarily muted in "{ctx.guild}". Reason: {reason}.')
 
     @tempmute.error
     async def tempmute_error(self, ctx, time):
-        if "s" or "m" or "d" or "y" not in str(time):
+        if "s" not in str(time) or "m" not in str(time) or "d" not in str(time) or "y" not in str(time):
             await ctx.respond(
-                "Invalid durantion. You can use `s` for seconds, `m` for minutes, `d` for days and `w` for weeks.",
+                "Invalid duration. You can use `s` for seconds, `m` for minutes, `d` for days and `w` for weeks.",
                 ephemeral=True
             )
             return

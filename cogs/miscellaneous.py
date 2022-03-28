@@ -52,6 +52,7 @@ class Miscellaneous(commands.Cog):
             roles = ", ".join([role.mention for role in list(user.roles[::-1]) if not role is ctx.guild.default_role])
             embed.add_field(name=f"Roles [{len(user.roles) - 1}]", value=roles)
         embed.set_thumbnail(url=f"{user.avatar}")
+        embed.set_footer(text=f"User ID: {user.id}")
 
         await ctx.respond(embed=embed)
 
@@ -81,6 +82,7 @@ class Miscellaneous(commands.Cog):
         embed.add_field(name="Created", value=f"<t:{round(ctx.guild.created_at.timestamp())}:R>")
         embed.add_field(name="Emojis", value=f"{len(ctx.guild.emojis)} emojis")
         embed.add_field(name="Verification level", value=f"{str(ctx.guild.verification_level).capitalize()}")
+        embed.set_footer(text=f"Guild ID: {ctx.guild.id}")
         embed.set_thumbnail(url=ctx.guild.icon)
 
         await ctx.respond(embed=embed)
@@ -92,13 +94,14 @@ class Miscellaneous(commands.Cog):
             user: Option(discord.Member, "User whose avatar to show.", required=False)
     ):
         user = user or ctx.author
-
+        
+            
         embed = discord.Embed(
             title=f"Avatar of {user.name}",
-            description=f"The avatar of {user} is available at this [link]({user.avatar}).",
+            description=f"The avatar of {user} is available at this [link]({user.display_avatar}).",
             color=embed_color
         )
-        embed.set_image(url=f"{user.avatar}")
+        embed.set_image(url=f"{user.display_avatar}")
 
         await ctx.respond(embed=embed)
 
@@ -145,20 +148,21 @@ class Miscellaneous(commands.Cog):
 
     @slash_command(description="Get information about RedEagle.")
     async def stats(self, ctx):
+        developer = self.client.get_user(825292137338765333)
+        
         embed = discord.Embed(
             title=f"Info and statistics on RedEagle",
             description=f"""
 **Info**
-<:developer:918867639886049301> Tommodev#0001
+<:developer:918867639886049301> {developer}
 <:python:918867852176551966> Developed in Python
-<:terminal:918868581150756894> Prefixes: `re!` | `Re!`
+<:terminal:918868581150756894> Prefix: `/` (slash commands)
 <:file_upload:918872362336804895> Version: `0.5`
 
 **Statistics**
 <:time:918871014182625281> Latency: `{round(self.client.latency * 1000, 1)}ms`
 <:server:918872745033490482> Servers: `{len(self.client.guilds)} servers`
 <:users:918873187670970389> Users: `{sum([len(guild.members) for guild in self.client.guilds])} users`
-<:list:918876883599368284> Commands: `42 commands`
             """,
             color=embed_color
         )
@@ -181,11 +185,14 @@ class Miscellaneous(commands.Cog):
                 description=f"{suggestion}",
                 color=embed_color
             )
-            embed.set_author(name=f"{ctx.author}", icon_url=f"{ctx.author.avatar}")
+            embed.set_author(name=f"{ctx.author}", icon_url=f"{ctx.author.display_avatar}")
             embed.set_footer(text=f"User ID: {ctx.author.id}")
 
             await ctx.respond("Suggestion successfully submitted!")
-            await channel.send(embed=embed)
+            message = await channel.send(embed=embed)
+            
+            await message.add_reaction("✅")
+            await message.add_reaction("❌")
 
     @slash_command(description="See what's new in the latest version of RedEagle.")
     async def changelog(self, ctx):

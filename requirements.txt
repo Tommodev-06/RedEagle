@@ -1,0 +1,4 @@
+py-cord==2.0.0b4
+python-dotenv==0.19.2
+humanfriendly==10.0
+requests==2.26.0
