@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from discord.commands import SlashCommandGroup, Option
-import sqlite3
 
 embed_color = 0xF00C0C
 
@@ -50,25 +49,24 @@ class Welcome(commands.Cog):
             ctx,
             channel: Option(discord.TextChannel, "Channel where welcome messages will be sent.")
     ):
-        global sql, val
+        await ctx.defer()
 
-        db = sqlite3.connect("main.db")
-        cursor = db.cursor()
+        cursor = self.client.db.cursor()
         cursor.execute(f"SELECT channel_id FROM Welcome WHERE guild_id = {ctx.guild.id}")
         result = cursor.fetchone()
 
         if result is None:
-            sql = "INSERT INTO Welcome(guild_id, channel_id) VALUES(?,?)"
-            val = (ctx.guild.id, channel.id)
-            await ctx.respond(f"Channel has been set to {channel.mention}.")
+            cursor.execute(
+                f"INSERT INTO Welcome(guild_id, channel_id) VALUES({ctx.guild.id}, {channel.id})"
+            )
         else:
-            sql = "UPDATE Welcome SET channel_id = ? WHERE guild_id = ?"
-            val = (channel.id, ctx.guild.id)
-            await ctx.respond(f"Channel has been set to {channel.mention}.")
+            cursor.execute(
+                f"UPDATE Welcome SET channel_id = {channel.id} WHERE guild_id = {ctx.guild.id}"
+            )
 
-        cursor.execute(sql, val)
-        db.commit()
-        cursor.close()
+        self.client.db.commit()
+
+        await ctx.respond(f"Channel has been set to {channel.mention}.")
 
     @welcome_group.command(description="Set the welcome message.")
     @commands.has_permissions(administrator=True)
@@ -77,42 +75,38 @@ class Welcome(commands.Cog):
             ctx,
             message: Option(str, "Message to be sent when a user joins.")
     ):
-        global sql, val
+        await ctx.defer()
 
-        db = sqlite3.connect("main.db")
-        cursor = db.cursor()
+        cursor = self.client.db.cursor()
         cursor.execute(f"SELECT message FROM Welcome WHERE guild_id = {ctx.guild.id}")
         result = cursor.fetchone()
 
         if result is None:
-            sql = "INSERT INTO Welcome(guild_id, message) VALUES(?,?)"
-            val = (ctx.guild.id, message)
-            await ctx.respond(f"Welcome message has been set to `{message}`.")
-        elif result is not None:
-            sql = "UPDATE welcome SET message = ? WHERE guild_id = ?"
-            val = (message, ctx.guild.id)
-            await ctx.respond(f"Welcome message has been set to `{message}`.")
+            cursor.execute(
+                f"INSERT INTO Welcome(guild_id, message) VALUES({ctx.guild.id}, {message})"
+            )
+        else:
+            cursor.execute(
+                f"UPDATE Welcome SET message = {message} WHERE guild_id = {ctx.guild.id}"
+            )
 
-        cursor.execute(sql, val)
-        db.commit()
-        cursor.close()
+        self.client.db.commit()
+
+        await ctx.respond(f"Welcome message has been set to `{message}`.")
 
     @welcome_group.command(description="Disable the welcome system.")
     @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
-        db = sqlite3.connect("main.db")
-        cursor = db.cursor()
+        cursor = self.client.db.cursor()
         cursor.execute(f"DELETE FROM Welcome WHERE guild_id = {ctx.guild.id}")
+
+        self.client.db.commit()
 
         await ctx.respond("The welcome system has been disabled.")
 
-        db.commit()
-        cursor.close()
-
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        db = sqlite3.connect("main.db")
-        cursor = db.cursor()
+        cursor = self.client.db.cursor()
         cursor.execute(f"SELECT channel_id FROM Welcome WHERE guild_id = {member.guild.id}")
         result = cursor.fetchone()
 
@@ -120,7 +114,7 @@ class Welcome(commands.Cog):
             return
         else:
             cursor.execute(f"SELECT message FROM Welcome WHERE guild_id = {member.guild.id}")
-            result1 = cursor.fetchone()
+            message = cursor.fetchone()
 
             total_members = str(member.guild.member_count)
             guild = member.guild
@@ -137,10 +131,12 @@ class Welcome(commands.Cog):
                 count = f"{member.guild.member_count}th"
 
             embed = discord.Embed(
-                description=str(result1[0]).format(count=count, members=total_members, guild=guild, mention=mention, name=name),
+                description=str(message[0]).format(
+                    count=count, members=total_members, guild=guild, mention=mention, name=name
+                ),
                 color=embed_color
             )
-            embed.set_author(name=f"{member}", icon_url=f"{member.avatar}")
+            embed.set_author(name=f"{member}", icon_url=f"{member.display_avatar}")
             embed.set_footer(text=f"User ID: {member.id}")
 
             channel = self.client.get_channel(int(result[0]))
