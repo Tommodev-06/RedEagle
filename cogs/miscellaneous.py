@@ -52,6 +52,7 @@ class Miscellaneous(commands.Cog):
             roles = ", ".join([role.mention for role in list(user.roles[::-1]) if not role is ctx.guild.default_role])
             embed.add_field(name=f"Roles [{len(user.roles) - 1}]", value=roles)
         embed.set_thumbnail(url=f"{user.avatar}")
+        embed.set_footer(text=f"User ID: {user.id}")
 
         await ctx.respond(embed=embed)
 
@@ -81,6 +82,7 @@ class Miscellaneous(commands.Cog):
         embed.add_field(name="Created", value=f"<t:{round(ctx.guild.created_at.timestamp())}:R>")
         embed.add_field(name="Emojis", value=f"{len(ctx.guild.emojis)} emojis")
         embed.add_field(name="Verification level", value=f"{str(ctx.guild.verification_level).capitalize()}")
+        embed.set_footer(text=f"Guild ID: {ctx.guild.id}")
         embed.set_thumbnail(url=ctx.guild.icon)
 
         await ctx.respond(embed=embed)
