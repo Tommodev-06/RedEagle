@@ -6,7 +6,7 @@ from asyncio import sleep
 from cogs.tickets import NewTicket
 import sqlite3
 
-client = discord.Bot(intents=discord.Intents(guilds=True, messages=True))
+client = discord.Bot(intents=discord.Intents(guilds=True, messages=True, message_content=True, members=True))
 client.persistent_views_added = False
 client.db = sqlite3.connect("main.db")
 
