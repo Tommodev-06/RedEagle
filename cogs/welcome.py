@@ -57,11 +57,11 @@ class Welcome(commands.Cog):
 
         if result is None:
             cursor.execute(
-                f"INSERT INTO Welcome(guild_id, channel_id) VALUES({ctx.guild.id}, {channel.id})"
+                f"INSERT INTO Welcome(guild_id, channel_id) VALUES(?,?)", (ctx.guild.id, channel.id)
             )
         else:
             cursor.execute(
-                f"UPDATE Welcome SET channel_id = {channel.id} WHERE guild_id = {ctx.guild.id}"
+                "UPDATE Welcome SET channel_id = ? WHERE guild_id = ?", (channel.id, ctx.guild.id)
             )
 
         self.client.db.commit()
@@ -83,11 +83,11 @@ class Welcome(commands.Cog):
 
         if result is None:
             cursor.execute(
-                f"INSERT INTO Welcome(guild_id, message) VALUES({ctx.guild.id}, {message})"
+                f"INSERT INTO Welcome(guild_id, message) VALUES(?,?)", (str(message), ctx.guild.id)
             )
         else:
             cursor.execute(
-                f"UPDATE Welcome SET message = {message} WHERE guild_id = {ctx.guild.id}"
+                "UPDATE Welcome SET message = ? WHERE guild_id = ?", (str(message), ctx.guild.id)
             )
 
         self.client.db.commit()
@@ -97,6 +97,8 @@ class Welcome(commands.Cog):
     @welcome_group.command(description="Disable the welcome system.")
     @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
+        await ctx.defer()
+
         cursor = self.client.db.cursor()
         cursor.execute(f"DELETE FROM Welcome WHERE guild_id = {ctx.guild.id}")
 
@@ -130,18 +132,13 @@ class Welcome(commands.Cog):
             else:
                 count = f"{member.guild.member_count}th"
 
-            embed = discord.Embed(
-                description=str(message[0]).format(
-                    count=count, members=total_members, guild=guild, mention=mention, name=name
-                ),
-                color=embed_color
-            )
-            embed.set_author(name=f"{member}", icon_url=f"{member.display_avatar}")
-            embed.set_footer(text=f"User ID: {member.id}")
-
             channel = self.client.get_channel(int(result[0]))
 
-            await channel.send(content=f"{member.mention}", embed=embed)
+            await channel.send(
+                content=f"""{message[0].format(
+                    count=count, members=total_members, guild=guild, mention=mention, name=name
+                )}"""
+            )
 
 def setup(client):
     client.add_cog(Welcome(client))
