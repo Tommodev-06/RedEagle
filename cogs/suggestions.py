@@ -20,24 +20,36 @@ class Suggestions(commands.Cog):
             ctx,
             channel: Option(discord.TextChannel, "Channel where suggestions will be sent.")
     ):
-        global sql, val
+        await ctx.defer()
 
-        db = sqlite3.connect("main.db")
-        cursor = db.cursor()
+        cursor = self.client.db.cursor()
         cursor.execute(f"SELECT channel_id FROM Suggestions WHERE guild_id = {ctx.guild.id}")
         result = cursor.fetchone()
 
         if result is None:
-            sql = "INSERT INTO Suggestions(guild_id, channel_id) VALUES(?,?)"
-            val = (ctx.guild.id, channel.id)
-            await ctx.respond(f"Channel has been set to {channel.mention}.")
-        elif result is not None:
-            sql = "UPDATE Suggestions SET channel_id = ? WHERE guild_id = ?"
-            val = (channel.id, ctx.guild.id)
-            await ctx.respond(f"Channel has been set to {channel.mention}.")
+            cursor.execute(
+                f"INSERT INTO Suggestions(guild_id, channel_id) VALUES(?,?)", (ctx.guild.id, channel.id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE Suggestions SET channel_id = ? WHERE guild_id = ?", (channel.id, ctx.guild.id)
+            )
 
-        cursor.execute(sql, val)
-        db.commit()
+        self.client.db.commit()
+
+        await ctx.respond(f"Channel has been set to {channel.mention}.")
+
+    @suggest_group.command(description="Disable the suggestion system.")
+    @commands.has_permissions(administrator=True)
+    async def disable(self, ctx):
+        await ctx.defer()
+
+        cursor = self.client.db.cursor()
+        cursor.execute(f"DELETE FROM Suggestions WHERE guild_id = {ctx.guild.id}")
+
+        self.client.db.commit()
+
+        await ctx.respond("The suggestion system has been disabled.")
 
     @suggest_group.command(description="Submit a suggestion for the server.")
     async def send(
@@ -47,19 +59,16 @@ class Suggestions(commands.Cog):
     ):
         await ctx.defer(ephemeral=True)
 
-        db = sqlite3.connect("main.db")
-        cursor = db.cursor()
+        cursor = self.client.db.cursor()
         cursor.execute(f"SELECT channel_id FROM Suggestions WHERE guild_id = {ctx.guild.id}")
         result = cursor.fetchone()
 
         if result is None:
             await ctx.respond(
-                f"{fail} {ctx.author.mention}, this server has no a suggestion channel. Please contact a server "
+                f"{fail} {ctx.author.mention}, this server has no suggestion channel. Please contact a server "
                 "admin to solve this issue.", ephemeral=True
             )
         else:
-            channel = self.client.get_channel(int(result[0]))
-
             if len(suggestion) < 10:
                 await ctx.respond("Your suggestion is too short. It must be at least 10 characters long.",
                                   ephemeral=True)
@@ -74,24 +83,14 @@ class Suggestions(commands.Cog):
                 embed.set_thumbnail(url=f"{ctx.author.display_avatar}")
                 embed.set_footer(text=f"User ID: {ctx.author.id}")
 
+                channel = self.client.get_channel(int(result[0]))
+
                 message = await channel.send(embed=embed)
 
                 await message.add_reaction("✅")
                 await message.add_reaction("❌")
 
                 await ctx.respond(f"Suggestion successfully submitted in {channel.mention}!", ephemeral=True)
-
-    @suggest_group.command(description="Disable the suggestion system.")
-    @commands.has_permissions(administrator=True)
-    async def disable(self, ctx):
-        db = sqlite3.connect("main.db")
-        cursor = db.cursor()
-        cursor.execute(f"DELETE FROM Suggestions WHERE guild_id = {ctx.guild.id}")
-
-        await ctx.respond("The suggestion system has been disabled.")
-
-        db.commit()
-        cursor.close()
 
 def setup(client):
     client.add_cog(Suggestions(client))
