@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from discord.commands import SlashCommandGroup, Option
-import sqlite3
 
 embed_color = 0xF00C0C
 success = "<a:success:865522277729566741>"
