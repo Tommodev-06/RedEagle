@@ -16,7 +16,7 @@ class Help(commands.Cog):
                 str,
                 "Category to show available commands.",
                 choices=[
-                    "AFK system"
+                    "AFK system",
                     "Fun",
                     "Miscellaneous",
                     "Moderation",
