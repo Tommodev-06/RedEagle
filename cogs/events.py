@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import datetime
+import random
 
 class InviteButton(discord.ui.View):
     def __init__(self):
@@ -16,18 +17,50 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.id == self.client.user.id:
+        if message.author.id == self.client.user.id or message.author.bot:
             return
+
+        cursor = self.client.db.cursor()
+
+        # AFK system
+
+        cursor.execute(
+            "SELECT reason FROM AFK WHERE user_id = ? and guild_id = ?", (message.author.id, message.guild.id)
+        )
+        data = cursor.fetchone()
+
+        if data:
+            await message.channel.send(
+                f"Welcome back {message.author.mention}! I removed your AFK status.", delete_after=10
+            )
+            cursor.execute(
+                "DELETE FROM AFK WHERE user_id = ? AND guild_id = ?", (message.author.id, message.guild.id)
+            )
+        if message.mentions:
+            for mention in message.mentions:
+                cursor.execute(
+                    "SELECT reason FROM AFK WHERE user_id = ? AND guild_id = ?", (mention.id, message.guild.id)
+                )
+                user_afk = cursor.fetchone()
+
+                if user_afk and mention.id != message.author.id:
+                    await message.channel.send(
+                        f"**{mention}** is AFK. Reason: {user_afk[0]}.", delete_after=10
+                    )
+
+        self.client.db.commit()
+
+        # Utilities
 
         if message.content == f"<@!{self.client.user.id}>" or message.content == f"<@{self.client.user.id}>":
             await message.reply(
                 "Hello, this is RedEagle! Run `/help` to see available commands.\nIf you don't see RedEagle in the "
-                "list of slash commands, reinvite it with the button below!", view=InviteButton()
+                "list of slash commands, re-invite it with the button below!", view=InviteButton()
             )
         elif "re!" in message.content or "Re!" in message.content:
             await message.reply(
                 f"Hey **{message.author.name}**, from now I use slash commands! Run `/help` to see available commands.\n"
-                "If you don't see RedEagle in the list of slash commands, reinvite it with the button below!",
+                "If you don't see RedEagle in the list of slash commands, re-invite it with the button below!",
                 view=InviteButton()
             )
 
@@ -40,7 +73,7 @@ class Events(commands.Cog):
             description=f"I joined **{guild.name}** right now and I'm in **{len(self.client.guilds)} servers** now!",
             color=0xF00C0C
         )
-        embed.timestamp = datetime.datetime.utcnow()
+        embed.timestamp = datetime.datetime.now()
 
         await channel.send("Hey <@825292137338765333>, I joined a new server!", embed=embed)
 
