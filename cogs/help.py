@@ -12,13 +12,32 @@ class Help(commands.Cog):
     async def help(
             self,
             ctx,
-            category: Option(str, "Category to show available commands.",
-                             choices=[
-                                 "Fun", "Miscellaneous", "Moderation", "Suggestion system", "Ticket system",
-                                 "Utilities", "Welcome system"
-                             ])
+            category: Option(
+                str,
+                "Category to show available commands.",
+                choices=[
+                    "AFK system"
+                    "Fun",
+                    "Miscellaneous",
+                    "Moderation",
+                    "Suggestion system",
+                    "Ticket system",
+                    "Utilities",
+                    "Welcome system"
+                ]
+            )
     ):
         global embed
+
+        if category == "AFK system":
+            embed = discord.Embed(
+                title="AFK system",
+                description="""
+`/afk set [reason]` ➜ set your AFK status.
+`/afk remove` ➜ remove your AFK status.
+                """,
+                color=embed_color
+            )
 
         if category == "Fun":
             embed = discord.Embed(
@@ -34,6 +53,19 @@ class Help(commands.Cog):
                 """,
                 color=embed_color
             )
+
+        elif category == "Welcome system":
+            embed = discord.Embed(
+                title="Welcome system",
+                description="""
+`/leave help` ➜ see the usable commands for the leave system.
+`/leave channel <channel>` ➜ set the channel for leave messages.
+`/leave message <message>` ➜ set the leave message.
+`/leave disable` ➜ disable the leave system.  
+                """,
+                color=embed_color
+            )
+
         elif category == "Miscellaneous":
             embed = discord.Embed(
                 title="Miscellaneous commands",
@@ -50,10 +82,11 @@ class Help(commands.Cog):
 `/changelog` ➜ see what's new in the latest version of RedEagle.
 `/invite` ➜ get the invite link of RedEagle.
 `/support` ➜ get the support server's link.
-`/vote` ➜ vote RedEagle.             
+`/vote` ➜ vote RedEagle on Top.gg.             
                 """,
                 color=embed_color
             )
+
         elif category == "Moderation":
             embed = discord.Embed(
                 title="Moderation commands",
@@ -70,6 +103,7 @@ class Help(commands.Cog):
                 """,
                 color=embed_color
             )
+
         elif category == "Suggestion system":
             embed = discord.Embed(
                 title="Suggestion system",
@@ -80,6 +114,7 @@ class Help(commands.Cog):
                 """,
                 color=embed_color
             )
+
         elif category == "Ticket system":
             embed = discord.Embed(
                 title="Ticket system",
@@ -92,6 +127,7 @@ class Help(commands.Cog):
                 """,
                 color=embed_color
             )
+
         elif category == "Utilities":
             embed = discord.Embed(
                 title="Utilities commands",
@@ -101,6 +137,7 @@ class Help(commands.Cog):
                 """,
                 color=embed_color
             )
+
         elif category == "Welcome system":
             embed = discord.Embed(
                 title="Welcome system",
