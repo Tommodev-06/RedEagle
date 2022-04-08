@@ -10,7 +10,7 @@ class Suggestions(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    suggest_group = SlashCommandGroup("suggest", "Setup the suggestion system for your server")
+    suggest_group = SlashCommandGroup("suggest", "Setup the suggestion system for your server.")
 
     @suggest_group.command(description="Set the channel for suggestions.")
     @commands.has_permissions(administrator=True)

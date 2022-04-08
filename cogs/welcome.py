@@ -66,7 +66,7 @@ class Welcome(commands.Cog):
 
         self.client.db.commit()
 
-        await ctx.respond(f"Channel has been set to {channel.mention}.")
+        await ctx.respond(f"Welcome channel has been set to {channel.mention}.")
 
     @welcome_group.command(description="Set the welcome message.")
     @commands.has_permissions(administrator=True)

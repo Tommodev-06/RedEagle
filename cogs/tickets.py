@@ -144,7 +144,7 @@ class NewTicket(discord.ui.View):
             embed = discord.Embed(
                 title="Thanks for opening a ticket!",
                 description=f"{interaction.user.mention}, while a staff member arrives at you, "
-                            f"describe your problem or tell us what you need.",
+                            "describe your problem or tell us what you need.",
                 color=embed_color
             )
 
@@ -175,7 +175,7 @@ class Tickets(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    tickets_group = SlashCommandGroup("ticket", "Setup the ticket system for your server")
+    tickets_group = SlashCommandGroup("ticket", "Setup the ticket system for your server.")
 
     @tickets_group.command(description="See the usable commands for the ticket system.")
     async def help(self, ctx):

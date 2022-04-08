@@ -6,7 +6,7 @@ embed_color = 0xF00C0C
 success = "<a:success:865522277729566741>"
 fail = "<a:fail:866017479696318534>"
 
-class Utilities(commands.Cog, description="Utilities commands"):
+class Utilities(commands.Cog):
     def __init__(self, client):
         self.client = client
 
